@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新建/编辑分类（栏目）</title>
+    <link rel="stylesheet" href="base.css"/>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="panel form">
+    <div class="title">
+        新建/编辑分类（栏目）
+    </div>
+    <div class="body">
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">父栏目</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" readonly type="text"/>
+            </div>
+        </label>
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">栏目名称</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" type="text"/>
+            </div>
+        </label>
+
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">允许模型</span>
+            </div>
+            <div class="media-body">
+                <div class="check-group">
+                    <label>
+                        <input name="isEnableField-0" value='{"text": "全部", "value": 0}' checked type="checkbox"/>
+                        <span>全部</span>
+                    </label>
+                    <label>
+                        <input name="isEnableField-0" value='{"text": "文章", "value": "article"}' type="checkbox"/>
+                        <span>文章</span>
+                    </label>
+                    <label>
+                        <input name="isEnableField-0" value='{"text": "否", "value": "link"}' type="checkbox"/>
+                        <span>链接</span>
+                    </label>
+                    <label>
+                        <input name="isEnableField-0" value='{"text": "商品", "value": "item"}' type="checkbox"/>
+                        <span>商品</span>
+                    </label>
+                    <label>
+                        <input name="isEnableField-0" value='{"text": "栏目扩展", "value": "extension"}' type="checkbox"/>
+                        <span>栏目扩展</span>
+                    </label>
+                </div>
+            </div>
+        </label>
+
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">链接</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" placeholder="默认前台展示链接规则为： catagory/get/:id，这里可以填写自定义链接" type="text"/>
+            </div>
+        </label>
+
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">图片</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" placeholder="默认前台展示链接规则为： catagory/get/:id，这里可以填写自定义链接" type="file"/>
+            </div>
+        </label>
+
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">是否启用</span>
+            </div>
+            <div class="media-body">
+                <div class="check-group">
+                    <label>
+                        <input name="isEnable" value='{"text": "是", "value": 1}' checked type="radio"/>
+                        <span>是</span>
+                    </label>
+                    <label>
+                        <input name="isEnable" value='{"text": "否", "value": 0}' type="radio"/>
+                        <span>否</span>
+                    </label>
+                </div>
+            </div>
+        </label>
+
+    </div>
+    <div class="footer text-right">
+        <button class="btn btn-primary">提交</button>
+    </div>
+</div>
+<script src="../../assets/zepto.js"></script>
+</body>
+</html>

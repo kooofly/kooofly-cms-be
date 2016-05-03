@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新建/编辑链接</title>
+    <link rel="stylesheet" href="base.css"/>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="panel form">
+    <div class="title">
+        新建/编辑链接
+    </div>
+    <div class="body">
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">所属栏目</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" readonly placeholder="可以有多个所属栏目" type="text"/>
+            </div>
+        </label>
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">链接名称</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" type="text"/>
+            </div>
+        </label>
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">链接摘要</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" type="text"/>
+            </div>
+        </label>
+
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">链接</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" type="text"/>
+            </div>
+        </label>
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">打开方式</span>
+            </div>
+            <div class="media-body">
+                <div class="check-group">
+                    <label>
+                        <input name="target" value='{"text": "_blank", "value": "_blank"}' checked type="checkbox"/>
+                        <span>_blank</span>
+                    </label>
+                </div>
+            </div>
+        </label>
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">图片</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" placeholder="默认前台展示链接规则为： catagory/get/:id，这里可以填写自定义链接" type="file"/>
+            </div>
+        </label>
+
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">是否启用</span>
+            </div>
+            <div class="media-body">
+                <div class="check-group">
+                    <label>
+                        <input name="isEnable" value='{"text": "是", "value": 1}' checked type="radio"/>
+                        <span>是</span>
+                    </label>
+                    <label>
+                        <input name="isEnable" value='{"text": "否", "value": 0}' type="radio"/>
+                        <span>否</span>
+                    </label>
+                </div>
+            </div>
+        </label>
+
+    </div>
+    <div class="footer text-right">
+        <button class="btn btn-primary">提交</button>
+    </div>
+</div>
+<script src="../../assets/zepto.js"></script>
+</body>
+</html>

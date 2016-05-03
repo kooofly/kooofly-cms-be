@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mock Ajax</title>
+    <style type="text/css">
+        button{ margin: 10px 0; }
+    </style>
+</head>
+<body>
+<button>非法插入测试</button>
+<button>查询所有</button>
+<button>查询单个</button>
+<button>删除单个</button>
+<button>更新单个</button>
+<button>按条件删除api</button>
+<button>插入dynamicCollection</button>
+
+<button>插入dynamicFiled</button>
+<button>查询dynamicCollection</button>
+<br>
+<button>插入Catagory</button>
+<button>search Catagory</button>
+<button>router</button>
+<script src="../assets/javascripts/jquery.js"></script>
+<script>
+
+    var $btns = $('button'), methods = []
+    $btns.on('click', function(e) {
+        var index = $btns.index(this)
+        console.log(index)
+        methods[index] && methods[index]()
+    })
+    methods.push(function() {
+        $.ajax({
+            type: 'post',
+            url: 'http://api.kooofly.com:3000/role/api/',
+            data: {
+                name: 'abctest',
+                owner: 'user',
+                method: 'post',
+                uri: '/abc',
+                isEnable: false
+            }
+        })
+    })
+    methods.push(function() {
+        $.ajax({
+            type: 'get',
+            url: 'http://api.kooofly.com:3000/role/api/' //dynamicCollection
+        })
+    })
+    methods.push(function() {
+        $.ajax({
+            type: 'get',
+            url: 'http://api.kooofly.com:3000/role/api/',
+            data: {
+                _id: '56aace61098362bc0x9e7bb1a'
+            }
+        })
+    })
+    methods.push(function() {
+        $.ajax({
+            type: 'delete',
+            url: 'http://api.kooofly.com:3000/role/api/56ab13b90cf8ec9006ce1d08'
+        })
+    })
+    methods.push(function() {
+        $.ajax({
+            type: 'put',
+            url: 'http://api.kooofly.com:3000/role/api/56aace61098362bc09e7bb1a',
+            data: {
+                name: 'ha update'
+            }
+        })
+    })
+    //按条件删除api
+    methods.push(function() {
+        $.ajax({
+            type: 'delete',
+            url: 'http://api.kooofly.com:3000/role/api/',
+            data: {
+                name: 'kooofly second api',
+                owner: "public"
+            }
+        })
+    })
+    methods.push(function() {
+        $.ajax({
+            type: 'post',
+            url: 'http://api.kooofly.com:3000/role/dynamicCollection/',
+            data: {
+                name: 'tt10',
+                collectionName: "tt10",
+                isEnable: true,
+                fields: JSON.stringify([
+                    {
+                        name: 'title1',
+                        control: 'text',
+                        type: 'string',
+                        isEnable: true
+                    },
+                    {
+                        name: 'sub_title1',
+                        control: 'text',
+                        type: 'string',
+                        isEnable: true
+                    }
+                ]),
+                apis: JSON.stringify([
+                    {
+                        name: 'xyz test',
+                        uri: 'xyz',
+                        method: 'get',
+                        owner: 'user',
+                        isEnable: true
+                    },
+                    {
+                        name: 'xyz2 test',
+                        uri: 'xyz2',
+                        method: 'get',
+                        owner: 'user',
+                        isEnable: true
+                    }
+                ])
+            }
+        })
+    })
+    methods.push(function() {
+        console.log('x');
+        $.ajax({
+            type: 'post',
+            url: 'http://api.kooofly.com:3000/role/dynamicFiled/',
+            data: {
+                body: JSON.stringify([
+                    {
+                        _creator: '56ac4d9df03dfb8c2f48cee4',
+                        name: 'title',
+                        control: 'text',
+                        type: 'string',
+                        isEnable: true
+                    },
+                    {
+                        _creator: '56ac4d9df03dfb8c2f48cee4',
+                        name: 'sub_title',
+                        control: 'text',
+                        type: 'string',
+                        isEnable: true
+                    }
+                ])
+            }
+        })
+    })
+    methods.push(function() {
+        console.log('x');
+        $.ajax({
+            type: 'get',
+            url: 'http://api.kooofly.com:3000/role/dynamicCollection/56adaced4f61e5b418ec80a4',//56ac745776f01b4417573d64
+            /*data: {
+                _id: '56ac745776f01b4417573d64x'
+            }*/
+        })
+    })
+    methods.push(function() {
+        $.ajax({
+            type: 'post',
+            url: 'http://api.kooofly.com:3000/role/catagory',
+            data: {
+                name: '第er个分类7',
+                allows: JSON.stringify(['56adac8d93151bd01d219aa4', '56adaced4f61e5b418ec80a4']),
+                isEnable: true,
+            }
+        })
+    })
+    //56aee7a31f2811b417c6cba1
+    methods.push(function() {
+        $.ajax({
+            type: 'get',
+            type: 'post',
+            type: 'put',
+            type: 'delete',
+            url: 'http://api.kooofly.com:3000/a/56aefcfba5c797b41deb6011/xa/fdfdfdf'
+        })
+    })
+
+    var o = {
+        a: {
+            ':id': {
+                c: 2
+            }
+        }
+    }
+    var path = ['a', ':id', 'c']
+    function getCallByPath(o, path) {
+        var key, _this
+        if(!path.length)
+            return o
+        key = path[0]
+        _this = o[key]
+        if(_this) {
+            path.shift()
+            return getCallByPath(o[key], path)
+        } else {
+            return null
+        }
+    }
+    var x = getCallByPath(o, path)
+    console.log(x)
+</script>
+</body>
+</html>

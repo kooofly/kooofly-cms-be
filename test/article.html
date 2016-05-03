@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新建/编辑链接</title>
+    <link rel="stylesheet" href="base.css"/>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="panel form">
+    <div class="title">
+        新建/编辑链接
+    </div>
+    <div class="body">
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">所属栏目</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" readonly placeholder="可以有多个所属栏目" type="text"/>
+            </div>
+        </label>
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">文章标题</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" type="text"/>
+            </div>
+        </label>
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">文章摘要</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" type="text"/>
+            </div>
+        </label>
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">链接</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" placeholder="默认为本文链接，这里可以填写url作为一个链接来使用" type="text"/>
+            </div>
+        </label>
+
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">图片</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" type="file"/>
+            </div>
+        </label>
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">文章正文</span>
+            </div>
+            <div class="media-body">
+                <textarea class="form-control" cols="30" rows="3"></textarea>
+            </div>
+        </label>
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">状态</span>
+            </div>
+            <div class="media-body">
+                <div class="check-group">
+                    <label>
+                        <input name="state" value='{"text": "草稿", "value": "DRAFT"}' checked type="radio"/>
+                        <span>草稿</span>
+                    </label>
+                    <label>
+                        <input name="state" value='{"text": "待审核", "value": "TO_AUDIT"}' type="radio"/>
+                        <span>待审核</span>
+                    </label>
+                    <label>
+                        <input name="state" value='{"text": "发布", "value": "PUBLISH"}' type="radio"/>
+                        <span>发布</span>
+                    </label>
+                </div>
+            </div>
+        </label>
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">是否启用</span>
+            </div>
+            <div class="media-body">
+                <div class="check-group">
+                    <label>
+                        <input name="isEnable" value='{"text": "是", "value": 1}' checked type="radio"/>
+                        <span>是</span>
+                    </label>
+                    <label>
+                        <input name="isEnable" value='{"text": "否", "value": 0}' type="radio"/>
+                        <span>否</span>
+                    </label>
+                </div>
+            </div>
+        </label>
+
+    </div>
+    <div class="footer text-right">
+        <button class="btn btn-primary">提交</button>
+    </div>
+</div>
+<script src="../../assets/zepto.js"></script>
+</body>
+</html>

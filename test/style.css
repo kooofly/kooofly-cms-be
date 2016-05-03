@@ -1,0 +1,17 @@
+.panel{ margin: 0.15rem 0; }
+.panel .body .body{ margin: 0.15rem 0; background: #f1f1f1; }
+.panel .media-body .body:last-child{ margin-bottom: 0; }
+
+.media .media-left { text-align: right; }
+.control-label{ display: inline-block; width: 60px; }
+.media-middle .media-left,
+.media-middle .media-body,
+.media-middle .media-right{ vertical-align: middle; }
+.check-group label{ margin-right: 10px; }
+.check-group label * { vertical-align: middle; }
+
+
+.branch {  }
+.branch .branch { padding-left: 28px; margin-top: 10px; }
+.branch .check-group{ padding: 10px; border:1px solid #eee; background: #fcfcfc; margin-bottom: 10px; }
+.branch .sub-group{ margin-top: 10px; }

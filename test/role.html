@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新建/编辑角色</title>
+    <link rel="stylesheet" href="base.css"/>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="panel form">
+    <div class="title">
+        新建/编辑角色
+    </div>
+    <div class="body">
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">角色名称</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" type="text"/>
+            </div>
+        </label>
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">角色说明</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" type="text"/>
+            </div>
+        </label>
+
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">是否启用</span>
+            </div>
+            <div class="media-body">
+                <div class="check-group">
+                    <label>
+                        <input name="isEnable" value='{"text": "是", "value": 1}' checked type="radio"/>
+                        <span>是</span>
+                    </label>
+                    <label>
+                        <input name="isEnable" value='{"text": "否", "value": 0}' type="radio"/>
+                        <span>否</span>
+                    </label>
+                </div>
+            </div>
+        </label>
+
+        <div class="media">
+            <div class="media-left">
+                <span class="control-label">栏目权限</span>
+            </div>
+            <div class="media-body">
+                <div class="branch">
+                    <div class="check-group">
+                        <label>
+                            <input name="catagory" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                            <span>栏目1</span>
+                        </label>
+                        <div class="sub-group">
+                            <label>
+                                <input name="api" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                                <span>api1</span>
+                            </label>
+                            <label>
+                                <input name="api" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                                <span>api2</span>
+                            </label>
+                        </div>
+
+                    </div>
+
+                    <div class="branch">
+                        <div class="check-group">
+                            <label>
+                                <input name="catagory" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                                <span>栏目1</span>
+                            </label>
+                            <div class="sub-group">
+                                <label>
+                                    <input name="api" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                                    <span>api1</span>
+                                </label>
+                                <label>
+                                    <input name="api" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                                    <span>api2</span>
+                                </label>
+                            </div>
+
+                        </div>
+
+                        <div class="branch">
+                            <div class="check-group">
+                                <label>
+                                    <input name="catagory" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                                    <span>栏目1</span>
+                                </label>
+                                <div class="sub-group">
+                                    <label>
+                                        <input name="api" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                                        <span>api1</span>
+                                    </label>
+                                    <label>
+                                        <input name="api" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                                        <span>api2</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        <div class="media">
+            <div class="media-left">
+                <span class="control-label">模型权限</span>
+            </div>
+            <div class="media-body">
+                <div class="branch">
+                    <div class="check-group">
+                        <label>
+                            <input name="catagory" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                            <span>模型1</span>
+                        </label>
+                        <div class="sub-group">
+                            <label>
+                                <input name="api" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                                <span>api1</span>
+                            </label>
+                            <label>
+                                <input name="api" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                                <span>api2</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="check-group">
+                        <label>
+                            <input name="catagory" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                            <span>模型1</span>
+                        </label>
+                        <div class="sub-group">
+                            <label>
+                                <input name="api" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                                <span>api1</span>
+                            </label>
+                            <label>
+                                <input name="api" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                                <span>api2</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="media">
+            <div class="media-left">
+                <span class="control-label">API权限(零碎功能权限)</span>
+            </div>
+            <div class="media-body">
+                <div class="branch">
+                    <div class="check-group">
+                        <label>
+                            <input name="catagory" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                            <span>功能1</span>
+                        </label>
+                        <label>
+                            <input name="catagory" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                            <span>api2</span>
+                        </label>
+                        <label>
+                            <input name="catagory" value='{"text": "栏目1", "value": 1}' checked type="checkbox"/>
+                            <span>api3</span>
+                        </label>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="footer text-right">
+        <button class="btn btn-primary">提交</button>
+    </div>
+</div>
+<script src="../../assets/zepto.js"></script>
+</body>
+</html>

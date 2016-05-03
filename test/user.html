@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新建/编辑用户</title>
+    <link rel="stylesheet" href="base.css"/>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="panel ">
+    <div class="body bg-info">
+        角色不能多选（防止权限冲突） 但可以不选 <br>
+        用户自己注册 <br>
+        1. 默认一个角色 <br>
+        2. 不属于任何角色 这样就只能访问user类api
+    </div>
+</div>
+<div class="panel form">
+    <div class="title">
+        新建/编辑用户
+    </div>
+    <div class="body">
+
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">是否启用</span>
+            </div>
+            <div class="media-body">
+                <div class="check-group">
+                    <label>
+                        <input name="isEnable" value='{"text": "是", "value": 1}' checked type="radio"/>
+                        <span>是</span>
+                    </label>
+                    <label>
+                        <input name="isEnable" value='{"text": "否", "value": 0}' type="radio"/>
+                        <span>否</span>
+                    </label>
+                </div>
+            </div>
+        </label>
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">所属角色</span>
+            </div>
+            <div class="media-body">
+                <div class="check-group">
+                    <label>
+                        <input name="isEnable" value='{"text": "角色1", "value": "1"}' type="checkbox"/>
+                        <span>角色1</span>
+                    </label>
+                    <label>
+                        <input name="isEnable" value='{"text": "否", "value": "2"}' type="checkbox"/>
+                        <span>角色2</span>
+                    </label>
+                </div>
+            </div>
+        </label>
+
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">用户名</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" type="text"/>
+            </div>
+        </label>
+
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">头像</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" placeholder="默认前台展示链接规则为： catagory/get/:id，这里可以填写自定义链接" type="file"/>
+            </div>
+        </label>
+
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">账号</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" type="text"/>
+            </div>
+        </label>
+
+        <label class="media media-middle">
+            <div class="media-left">
+                <span class="control-label">密码</span>
+            </div>
+            <div class="media-body">
+                <input class="form-control" type="password"/>
+            </div>
+        </label>
+    </div>
+    <div class="footer text-right">
+        <button class="btn btn-primary">提交</button>
+    </div>
+</div>
+<script src="../../assets/zepto.js"></script>
+</body>
+</html>
