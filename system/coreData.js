@@ -206,48 +206,68 @@ var data = [
         fields: [
             {
                 name: 'parentId',
-                attribute: { type: 'ObjectId' }
-            },
-            {
-                name: 'alias',
-                attribute: { type: 'String' },
-                control: 'text'
-            },
-            {
-                name: 'type',
-                attribute: { type: 'String' }, //page || null
+                attribute: { type: 'ObjectId' },
+                control: {
+                    name: 'select',
+                    data: '@catagory',
+                    label: '父栏目'
+                },
             },
             {
                 name: 'name',
                 attribute: { type: 'String', required: true },
-                control: 'text'
+                control: {
+                    name: 'text',
+                    label: '栏目名称'
+                }
+            },
+            {
+                name: 'alias',
+                attribute: { type: 'String' },
+                control: {
+                    name: 'text',
+                    label: '栏目别名'
+                }
             },
             {
                 name: 'link',
                 attribute: { type: 'String' },
-                control: 'text'
+                control: {
+                    name: 'text',
+                    label: '栏目链接'
+                }
             },
             {
                 name: 'logo',
                 attribute: { type: 'String' },
                 control: {
-                    name: 'upload'
+                    name: 'upload',
+                    label: '栏目Logo'
                 }
             },
             {
                 name: 'isEnable',
                 attribute: { type: 'Boolean', required: true },
-                control: 'radio-boolean'
+                control: {
+                    name: 'radio-boolean',
+                    label: '是否启用'
+                }
             },
             {
                 name: 'info',
                 attribute: { type: 'Object' },
-                control: 'fields-info'
+                control: {
+                    name: 'fields-info',
+                    label: '栏目信息'
+                }
+            },
+            {
+                name: 'type',
+                attribute: { type: 'String' }, //page || null || menu
             },
             {
                 name: 'sort',
-                attribute: { type: 'Number' },
-                control: 'number'
+                attribute: { type: 'Number' }
             },
             {
                 name: 'lastModifyTime',
