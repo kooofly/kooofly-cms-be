@@ -24,12 +24,12 @@ var methodMap = {
     delete: 'delete'
 }
 module.exports = function(app, condition, prefix) {
-    app.use(function(req, res, next) {
+    /*app.use(function(req, res, next) {
         res.set('Access-Control-Allow-Origin', "*")
         res.set('Access-Control-Allow-Methods', "GET,POST,PUT,DELETE,OPTIONS")
         res.set('Access-Control-Allow-Headers', "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
         next()
-    })
+    })*/
     promiseModels.then(function(models) {
         models['api'].find(condition || {}).then(function(result) {
             result.forEach(function(v, index) {
@@ -56,12 +56,22 @@ module.exports = function(app, condition, prefix) {
                     }
                 })
             })
-        }).then(function() {
+        }, function(err) {
+            console.log('router.js 60', err)
+        }).then(function(err) {
+            console.log(err)
             // catch 404 and forward to error handler
             app.use(function(req, res, next) {
-                var err = new Error('Not Found');
-                err.status = 404;
-                next(err);
+                if (req.method === 'OPTIONS') {
+                    res.json({
+                        status: 200
+                    })
+                } else {
+                    var err = new Error('Not Found');
+                    err.status = 404;
+                    next(err);
+                }
+
             });
             //app.set('env', 'production');
             // error handlers
@@ -90,7 +100,7 @@ module.exports = function(app, condition, prefix) {
             });
         })
     }, function(err) {
-        console.log(err)
+        console.log('router.js 103', err)
     })
 
 }

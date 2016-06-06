@@ -19,14 +19,34 @@ module.exports = {
             uri: 'menu'
         }),
         createDocument({
+            uri: 'menu',
+            method: 'post'
+        }),
+        createDocument({
             uri: 'catagory'
+        }),
+        createDocument({
+            uri: 'catagory',
+            method: 'post'
         }),
         createDocument({
             uri: 'api'
         }),
         createDocument({
+            uri: 'api',
+            method: 'post'
+        }),
+        createDocument({
             uri: 'dynamiccollection'
         }),
+        createDocument({
+            uri: 'dynamiccollection',
+            method: 'post'
+        }),
+        createDocument({
+            uri: 'dynamiccollection',
+            method: 'put'
+        })
     ]
 }
 //Catagory
