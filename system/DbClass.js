@@ -76,7 +76,7 @@ var DbClass = Class.extend({
     },
     update: function(req, res) {
         var data = req.body
-        var conditions = req.params
+        var conditions = req.query
         this._update(conditions, data).then(function(result) {
             res.json(result)
         })

@@ -57,7 +57,16 @@ var APIs = DbClass.extend({
                 })
 
         }).then(function(data) {
-            var fields = data.fields ? JSON.parse(data.fields) : []
+            var fields
+            if (data.fields) {
+                if (typeof data.fields === 'string') {
+                    fields = JSON.parse(data.fields)
+                } else {
+                    fields = data.fields
+                }
+            } else {
+                fields = []
+            }
             if(!fields.length) {
                 return new Promise(function(resolve, reject) {
                     reject({
