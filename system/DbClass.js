@@ -40,6 +40,8 @@ var DbClass = Class.extend({
     _delete: function(conditions) {
         return this.getModel().then(function(model) {
             return model.remove(conditions)
+        }, function(err) {
+            console.log(err)
         })
     },
     create: function(req, res, duplicateConditions) {
