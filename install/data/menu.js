@@ -11,6 +11,7 @@ var apiId = objectid()
 var routeId = objectid()
 var wedigetId = objectid()
 var areaId = objectid()
+var configId = objectid()
 
 function createDocument(option) {
     var o = {
@@ -83,6 +84,12 @@ module.exports = {
             _id: areaId,
             name: 'Area管理',
             alias: 'area'
+        }),
+        createDocument({
+            parentId: systemId,
+            _id: configId,
+            name: '系统配置',
+            alias: 'systemconfig'
         })
     ]
 }

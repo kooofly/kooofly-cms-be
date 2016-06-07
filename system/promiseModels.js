@@ -77,8 +77,8 @@ function  getMOdelFromCore() {
             if(collectionName === 'dynamiccollection') return
             createModel(collectionName, v.fields)
         })
-        return db.connections[0].models
-        // return db.models
+        // return db.connections[0].models
+        return db.models
     })
 }
 

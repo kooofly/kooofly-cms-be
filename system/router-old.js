@@ -3,7 +3,6 @@ var promiseModels = require('./promiseModels')
 var apis = require('../resetful/index')
 var common = require('./common')
 var config = require('./config')
-var DbClass = require('./DbClass')
 var msgs = config[config.lang]
 function getCallByPath(o, path) {
     var key, _this
@@ -34,11 +33,7 @@ module.exports = function(app, condition, prefix) {
     promiseModels.then(function(models) {
         models['api'].find(condition || {}).then(function(result) {
             result.forEach(function(v, index) {
-                if (!apis[v.uri]) {
-                    apis[v.uri] = new DbClass(v.uri)
-                }
-            })
-            result.forEach(function(v, index) {
+
                 var __log = []
                 var uri = v.uri.toLowerCase(),
                     method = v.method,

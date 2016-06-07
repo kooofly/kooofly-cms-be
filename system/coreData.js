@@ -9,6 +9,34 @@ function createDocument(option) {
     common.mix(o, option)
     return o;
 }
+var isEnable = {
+    name: 'isEnable',
+    attribute: { type: 'Boolean', required: true },
+    control: {
+        name: 'radio-boolean',
+        label: '是否启用'
+    }
+}
+var lastModifyTime = {
+        name: 'lastModifyTime',
+        attribute: { type: 'Date', default: 'Date.now' }
+}
+var sort = {
+    name: 'sort',
+    attribute: { type: 'Number' }
+}
+var openMode = {
+    name: 'openMode',
+    attribute: { type: 'String' },
+    control: {
+        name: 'select',
+        default: '',
+        data: [
+            { text: '默认(本窗口)', value: '' },
+            { text: '新窗口', value: '_blank' }
+        ]
+    }
+}
 var data = [
     createDocument({
         _id: ids.MODEL_DynamicCollection_ID,
@@ -44,18 +72,8 @@ var data = [
                     name: 'group-fields'
                 }
             },
-            {
-                name: 'isEnable',
-                attribute: { type: 'Boolean', required: true },
-                control: {
-                    label: '是否启用',
-                    name: 'radio-boolean'
-                },
-            },
-            {
-                name: 'lastModifyTime',
-                attribute: { type: 'Date', default: 'Date.now' }
-            }
+            isEnable,
+            lastModifyTime
         ]
     }),
     createDocument({
@@ -68,43 +86,53 @@ var data = [
                 attribute: { type: 'ObjectId' },
                 showFilter: 'empty'
             },
-            {
+            /*{
                 name: 'parentId',
                 attribute: { type: 'ObjectId' }
-            },
-            {
+            },*/
+            /*{
                 name: 'name',
                 attribute: { type: 'String' },
-                control: 'text'
-            },
+                control: {
+                    name: 'text',
+                    label: 'API名称'
+                }
+            },*/
             {
                 name: 'uri',
                 attribute: { type: 'String', required: true },
-                control: 'text'
+                control: {
+                    name: 'text',
+                    label: 'API uri'
+                }
             },
             {
                 name: 'type',
                 attribute: { type: 'String', default: 'api' },
                 control: {
                     name: 'select',
+                    default: 'api',
                     data: [
                         { text: 'api', value: 'api' },
                         { text: 'route', value: 'route' }
-                    ]
+                    ],
+                    label: '类型'
                 }
             },
             {
                 name: 'method',
                 attribute: { type: 'String', required: true },
                 control: {
-                    name: 'select',
-                    data: [
+                    name: 'text',
+                    placeholder: '可填写的值有get,post,put,delete，不同的值之间用逗号分隔，分别对应查询，保存，更新，删除',
+                    /*data: [
                         { text: '请选择', value: '' },
                         { text: 'get', value: 'get' },
                         { text: 'post', value: 'post' },
                         { text: 'put', value: 'put' },
                         { text: 'delete', value: 'delete' }
-                    ]
+                    ],*/
+                    label: '动作'
                 }
             },
             {
@@ -120,24 +148,16 @@ var data = [
                 }
             },
             {
-                name: 'isEnable',
-                attribute: { type: 'Boolean', required: true },
-                control: 'radio-boolean'
-            },
-            {
                 name: 'description',
                 attribute: { type: 'String' },
-                control: 'textarea'
+                control: {
+                    name: 'textarea',
+                    label: 'API描述'
+                }
             },
-            {
-                name: 'sort',
-                attribute: { type: 'Number' },
-                control: 'number'
-            },
-            {
-                name: 'lastModifyTime',
-                attribute: { type: 'Date', default: 'Date.now' }
-            }
+            isEnable,
+            sort,
+            lastModifyTime
         ]
 
     }),
@@ -149,22 +169,27 @@ var data = [
             {
                 name: 'account',
                 attribute: { type: 'String', required: true },
-                control: 'text'
+                control: {
+                    name: 'text',
+                    label: '账号'
+                }
             },
             {
                 name: 'password',
                 attribute: { type: 'String', required: true },
-                control: 'password'
+                control: {
+                    name: 'password',
+                    label: '密码'
+                }
             },
-            {
-                name: 'isEnable',
-                attribute: { type: 'Boolean', required: true },
-                control: 'radio-boolean'
-            },
+            isEnable,
             {
                 name: 'info',
                 attribute: { type: 'Object' },
-                control: 'text-group'
+                control: {
+                    name: 'group-info',
+                    label: '其他信息'
+                },
             }
         ]
     }),
@@ -176,27 +201,22 @@ var data = [
             {
                 name: 'name',
                 attribute: { type: 'String', required: true },
-                control: 'text'
+                control: {
+                    name: 'text',
+                    label: '角色名'
+                }
             },
             {
                 name: 'description',
                 attribute: { type: 'String' },
-                control: 'text-group'
+                control: {
+                    name: 'textarea',
+                    label: '角色描述'
+                }
             },
-            {
-                name: 'sort',
-                attribute: { type: 'Number' },
-                control: 'number'
-            },
-            {
-                name: 'isEnable',
-                attribute: { type: 'Boolean', required: true },
-                control: 'radio-boolean'
-            },
-            {
-                name: 'lastModifyTime',
-                attribute: { type: 'Date', default: 'Date.now' }
-            }
+            isEnable,
+            sort,
+            lastModifyTime
         ]
     }),
     createDocument({
@@ -209,7 +229,7 @@ var data = [
                 attribute: { type: 'ObjectId' },
                 control: {
                     name: 'select',
-                    data: '@catagory',
+                    data: '@catagory', //@表示调用catagory查询api
                     label: '父栏目'
                 },
             },
@@ -246,33 +266,20 @@ var data = [
                 }
             },
             {
-                name: 'isEnable',
-                attribute: { type: 'Boolean', required: true },
-                control: {
-                    name: 'radio-boolean',
-                    label: '是否启用'
-                }
+                name: 'type',
+                attribute: { type: 'String' }, //栏目类型，可能废弃，因为智能添加模型（template 添加模型）更灵活  page || null || menu
             },
+            isEnable,
             {
                 name: 'info',
                 attribute: { type: 'Object' },
                 control: {
-                    name: 'fields-info',
+                    name: 'group-info',
                     label: '栏目信息'
                 }
             },
-            {
-                name: 'type',
-                attribute: { type: 'String' }, //page || null || menu
-            },
-            {
-                name: 'sort',
-                attribute: { type: 'Number' }
-            },
-            {
-                name: 'lastModifyTime',
-                attribute: { type: 'Date', default: 'Date.now' }
-            }
+            sort,
+            lastModifyTime,
         ]
     }),
     createDocument({
@@ -283,42 +290,38 @@ var data = [
             {
                 name: 'title',
                 attribute: { type: 'String', required: true },
-                control: 'text'
+                control: {
+                    name: 'text',
+                    label: '链接标题'
+                }
             },
             {
                 name: 'link',
                 attribute: { type: 'String', required: true },
-                control: 'text'
-            },
-            {
-                name: 'openMode',
-                attribute: { type: 'String' },
                 control: {
-                    name: 'radio',
-                    data: [
-                        { text: '默认', value: '', checked: true },
-                        { text: '新窗口', value: '_blank' }
-                    ]
+                    name: 'text',
+                    label: '链接'
                 }
             },
+            openMode,
             {
                 name: 'description',
                 attribute: { type: 'String' },
-                control: 'text'
+                control: {
+                    name: 'text',
+                    label: '描述'
+                }
             },
             {
                 name: 'logo',
                 attribute: { type: 'String' },
                 control: {
-                    name: 'upload'
+                    name: 'upload',
+                    label: '图片'
                 }
             },
-            {
-                name: 'isEnable',
-                attribute: { type: 'Boolean', required: true },
-                control: 'radio-boolean'
-            },
-            {
+            isEnable,
+            /*{ // 忘记是干嘛用的了
                 name: 'status',
                 attribute: { type: 'String', required: true },
                 control: {
@@ -328,16 +331,9 @@ var data = [
                         value: 'role_article_status'
                     }
                 }
-            },
-            {
-                name: 'sort',
-                attribute: { type: 'Number' },
-                control: 'number'
-            },
-            {
-                name: 'lastModifyTime',
-                attribute: { type: 'Date', default: 'Date.now' }
-            }
+            },*/
+            sort,
+            lastModifyTime
         ]
     }),
     createDocument({
@@ -348,51 +344,50 @@ var data = [
             {
                 name: 'title',
                 attribute: { type: 'String', required: true },
-                control: 'text'
+                control: {
+                    name: 'text',
+                    label: '标题'
+                }
             },
             {
                 name: 'digest',
                 attribute: { type: 'String' },
-                control: 'text'
+                control: {
+                    name: 'textarea',
+                    label: '摘要'
+                }
             },
             {
                 name: 'link',
                 attribute: { type: 'String' },
-                control: 'text'
-            },
-            {
-                name: 'openMode',
-                attribute: { type: 'String' },
                 control: {
-                    name: 'radio',
-                    data: [
-                        { text: '默认', value: '', checked: true },
-                        { text: '新窗口', value: '_blank' }
-                    ]
+                    name: 'text',
+                    label: '链接'
                 }
             },
+            openMode,
             {
                 name: 'logo',
                 attribute: { type: 'String' },
                 control: {
-                    name: 'upload'
+                    name: 'upload',
+                    label: '文章主图'
                 }
             },
             {
                 name: 'content',
                 attribute: { type: 'String' },
-                control: 'richtext|markdown'
+                control: {
+                    name: 'textarea-rich',
+                    label: '正文内容'
+                }
             },
             {
-                name: 'contentParser',
+                name: 'contentParser', //可能是markdown解析或者是正常解析
                 attribute: { type: 'String' }
             },
-            {
-                name: 'isEnable',
-                attribute: { type: 'Boolean', required: true },
-                control: 'radio-boolean'
-            },
-            {
+            isEnable,
+            /*{ // 忘记干嘛用的了，貌似是权限相关的
                 name: 'status',
                 attribute: { type: 'String', required: true },
                 control: {
@@ -402,16 +397,9 @@ var data = [
                         value: 'role_article_status'
                     }
                 }
-            },
-            {
-                name: 'sort',
-                attribute: { type: 'Number' },
-                control: 'number'
-            },
-            {
-                name: 'lastModifyTime',
-                attribute: { type: 'Date', default: 'Date.now' }
-            }
+            },*/
+            sort,
+            lastModifyTime
         ]
     }),
     createDocument({
@@ -422,45 +410,31 @@ var data = [
             {
                 name: 'name',
                 attribute: { type: 'String', required: true },
-                control: 'text'
+                control: {
+                    name: 'text',
+                    label: '标签名称'
+                }
             },
             {
                 name: 'link',
                 attribute: { type: 'String' },
-                control: 'text'
-            },
-            {
-                name: 'openMode',
-                attribute: { type: 'String' },
                 control: {
-                    name: 'radio',
-                    data: [
-                        { text: '默认', value: '', checked: true },
-                        { text: '新窗口', value: '_blank' }
-                    ]
+                    name: 'text',
+                    label: '标签链接'
                 }
             },
+            openMode,
             {
                 name: 'logo',
                 attribute: { type: 'String' },
                 control: {
-                    name: 'upload'
+                    name: 'upload',
+                    label: '标签图标'
                 }
             },
-            {
-                name: 'isEnable',
-                attribute: { type: 'Boolean', required: true },
-                control: 'radio-boolean'
-            },
-            {
-                name: 'sort',
-                attribute: { type: 'Number' },
-                control: 'number'
-            },
-            {
-                name: 'lastModifyTime',
-                attribute: { type: 'Date', default: 'Date.now' }
-            }
+            isEnable,
+            sort,
+            lastModifyTime
         ]
     }),
     createDocument({
@@ -548,56 +522,97 @@ var data = [
                 name: 'contentType',
                 attribute: { type: 'String', required: true }
             },
-            {
-                name: 'sort',
-                attribute: { type: 'Number' }
-            }
-        ]
-    }),
-    createDocument({
-        _id: ids.MODEL_Wediget_ID,
-        name: 'Widget表',
-        collectionName: 'widget',
-        fields: [
-            {
-                name: 'name',
-                attribute: { type: 'String', required: true },
-                control: 'text'
-            },
-            {
-                name: 'code',
-                attribute: { type: 'String', required: true },
-                control: 'text'
-            },
-            {
-                name: 'lastModifyTime',
-                attribute: { type: 'Date', default: 'Date.now' }
-            }
+            sort
         ]
     }),
     createDocument({
         name: '区域表',
+        // 这个是针对内容的，用户使用 以后有ui界面，强调易用性
+        // systemconfig里面的配置是针对会coding的超级管理员使用，强调配置灵活性
         collectionName: 'area',
         fields: [
             {
-                name: '_id',
-                attribute: { type: 'ObjectId' },
+                name: 'code',
+                attribute: { type: 'String' },
                 showFilter: 'areaCode'
             },
             {
-                name: 'name',
+                name: 'description',
                 attribute: { type: 'String', required: true },
-                control: 'text'
+                control: {
+                    name: 'text',
+                    label: '描述',
+                    placeholder: '举例使用方式\n说明Widget需要的参数\n说明Widget的使用场景，范围\n第一次使用的考虑等'
+                }
             },
             {
-                name: 'limit',
+                name: 'widget', // 指定一个列表widget
+                attribute: { type: 'String', required: true },
+                control: {
+                    name: 'select', // TODO 用一个布局图形表示
+                    data: '@widget?type=content',
+                    label: '布局方式'
+                    // 统一不同模型的字段名称，可以让这个功能实现变得简单
+                }
+            },
+            {
+                name: 'paging',
+                attribute: { type: 'String' },
+                control: {
+                    name: 'select', // TODO 用一个布局图形表示
+                    data: '@widget?type=paging',
+                    label: '分页' // 选择分页控件
+                }
+            },
+            {
+                name: 'size',
                 attribute: { type: 'Number' },
-                control: 'number'
+                control: {
+                    name: 'number',
+                    label: '每页显示数'
+                }
+            },
+            lastModifyTime
+        ]
+    }),
+    createDocument({
+        _id: ids.MODEL_Wediget_ID,
+        name: 'Widget表', //删除了区域表，区域作为Widget之一，一个页面可能由多个区域组成，所以区域需要id Widget需要id
+        collectionName: 'widget',
+        fields: [
+            {
+                name: 'name', // widget name 用来匹配widget 唯一性
+                attribute: { type: 'String', required: true },
+                control: {
+                    name: 'text',
+                    label: '名称',
+                    placeholder: 'Widget名称，用来匹配Widget'
+                }
             },
             {
-                name: 'lastModifyTime',
-                attribute: { type: 'Date', default: 'Date.now' }
-            }
+                name: 'type',
+                attribute: { type: 'String', required: true },
+                control: {
+                    name: 'select',
+                    default: 'system',
+                    data: [
+                        { value: 'system', text: '系统Widget' },
+                        { value: 'content', text: '内容Widget（区域配置使用）' },
+                        { value: 'paging', text: '分页（区域配置使用）' }
+                    ],
+                    label: 'Widget类型'
+                }
+            },
+            {
+                name: 'description',
+                attribute: { type: 'String', required: true },
+                control: {
+                    name: 'textarea',
+                    label: '描述',
+                    placeholder: '举例使用方式\n说明Widget需要的参数\n说明Widget的使用场景，范围\n第一次使用的考虑等'
+                }
+            },
+            lastModifyTime
         ]
     }),
     createDocument({
@@ -605,25 +620,32 @@ var data = [
         collectionName: 'systemconfig',
         fields: [
             {
-                name: 'code', //可能是一个链接
+                name: 'code', //可能是一个链接 可能是一个module 唯一性，主键 考虑 配置 版本问题。 相同的配置code 以最后时间的配置为准
                 attribute: { type: 'String', required: true },
-                control: 'text'
+                control: {
+                    name: 'text',
+                    label: 'Code'
+                }
             },
             {
-                name: 'runtime',
-                attribute: { type: 'String', default: 'ready' },
-                control: 'text'
-            },
-            {
-                name: 'parser',
-                attribute: { type: 'String' },
-                control: 'text'
-            },
-            {
-                name: 'config',
+                name: 'config',// 考虑 vue 生命周期 vue method
                 attribute: { type: 'Object' },
-                control: 'textarea'
-            }
+                control: {
+                    name: 'textarea',
+                    label: '配置',
+                    placeholder: 'JSON数据'
+                }
+            },
+            {
+                name: 'description',
+                attribute: { type: 'String' },
+                control: {
+                    name: 'textarea',
+                    label: '描述',
+                    placeholder: '举例使用方式\n说明配置含义\n说明使用场景，范围\n第一次使用的考虑等'
+                }
+            },
+            lastModifyTime
         ]
     }),
     createDocument({
