@@ -67,12 +67,13 @@ module.exports = {
             name: 'API管理',
             alias: 'api'
         }),
+        /* TODO 可能不需要 等需要的时候再 开启
         createDocument({
             parentId: systemId,
             _id: routeId,
             name: 'route管理',
             alias: 'route'
-        }),
+        }),*/
         createDocument({
             parentId: systemId,
             _id: wedigetId,

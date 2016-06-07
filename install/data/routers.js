@@ -19,13 +19,34 @@ module.exports = {
             uri: 'menu'
         }),
         createDocument({
-            uri: 'catagory'
+            uri: 'dynamiccollection'
         }),
         createDocument({
             uri: 'api'
         }),
         createDocument({
-            uri: 'dynamiccollection'
+            uri: 'user'
+        }),
+        createDocument({
+            uri: 'role'
+        }),
+        createDocument({
+            uri: 'catagory'
+        }),
+        createDocument({
+            uri: 'link'
+        }),
+        createDocument({
+            uri: 'article'
+        }),
+        createDocument({
+            uri: 'tag'
+        }),
+        createDocument({
+            uri: 'area'
+        }),
+        createDocument({
+            uri: 'widget'
         }),
         createDocument({
             uri: 'systemconfig'
