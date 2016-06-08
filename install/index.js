@@ -1,5 +1,6 @@
 var common = require('../system/common')
 var apis = require('../resetful/index')
+var promiseModels = require('../system/promiseModels')
 var dataPaths = common.traversalFolder('install/data', './data')
 var data = {}
 dataPaths.forEach(function(v, i) {
