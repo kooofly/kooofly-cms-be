@@ -9,8 +9,7 @@ var APIs = DbClass.extend({
         return this
     },
     read: function(req, res) {
-        var isSingle = common.renameKey(req.params, { _id: 'id' })._id ? true : false
-        this._super.read.call(this, req, res, isSingle)
+        this._super.read.call(this, req, res)
     },
     create: function(req, res) {
         var duplicateConditions = {

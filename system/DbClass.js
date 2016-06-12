@@ -40,8 +40,15 @@ var DbClass = Class.extend({
         return this._read(conditions)
     },
     _readPaging: function(conditions, params) {
-        var limit = params.limit
-        return this._read(conditions).skip(params.page * limit).limit(limit)
+        var limit = parseInt(params.__limit, 10)
+        var skip = (params.__page - 1) * limit
+        console.log(typeof limit)
+        console.log(typeof params.__page)
+        return this.getModel().then(function(model) {
+            return model.find(conditions).sort({'_id': 1}).skip(skip).limit(limit)
+        }, function (err) {
+            console.log(err)
+        })
     },
     _delete: function(conditions) {
         return this.getModel().then(function(model) {
@@ -91,26 +98,34 @@ var DbClass = Class.extend({
     },
     read: function(req, res) {
         var query = req.query
-        var params = req.params
-        var isSingle = params.single // 是否返回单条数据
-        var isPaging = params.limit && params.page // 是否使用分页查询
-        var isAssociated = params.associated // 是否使用联表查询
+        /* var params = req.params */
+
+        var isSingle = query._single // 是否返回单条数据
+        var isPaging = query._limit && query._page // 是否使用分页查询
+        var isAssociated = query._associated // 是否使用联表查询
+        var q = {}
+        // 这里故意过滤了_id 因为_id 查询的时候必然只有一条 ，因此数据库字段命名不要用“_”开头（除非需要）
+        for (var key in query) {
+            if (!/_/.test(key)) {
+                q[key] = query[key]
+            }
+        }
         if (isAssociated) {
-            this._readAssociated(query).then(function (result) {
+            this._readAssociated(q).then(function (result) {
                 var json = isSingle ? result[0] : result
                 res.json(json)
             }, function (err) {
                 res.json(err)
             })
         } else if (isPaging) {
-            this._readPaging(query, params).then(function (result) {
+            this._readPaging(q, query).then(function (result) {
                 var json = isSingle ? result[0] : result
                 res.json(json)
             }, function (err) {
                 res.json(err)
             })
         } else {
-            this._read(query).then(function(result) {
+            this._read(q).then(function(result) {
                 var json = isSingle ? result[0] : result
                 res.json(json)
             }, function(err) {

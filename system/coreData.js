@@ -83,7 +83,7 @@ var data = [
         collectionName: 'api',
         fields: [
             {
-                name: '_creator',
+                name: 'creator',
                 attribute: { type: 'ObjectId' },
                 showFilter: 'empty'
             },
