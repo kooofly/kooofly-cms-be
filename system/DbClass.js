@@ -35,7 +35,13 @@ var DbClass = Class.extend({
         return this.getModel().then(function(model) {
             return model.find(conditions)
         })
-
+    },
+    _readAssociated: function(conditions) {
+        return this._read(conditions)
+    },
+    _readPaging: function(conditions, params) {
+        var limit = params.limit
+        return this._read(conditions).skip(params.page * limit).limit(limit)
     },
     _delete: function(conditions) {
         return this.getModel().then(function(model) {
@@ -83,17 +89,35 @@ var DbClass = Class.extend({
             res.json(result)
         })
     },
-    read: function(req, res, isSingle) {
-        var query = req.query,
-            params = req.params,
-            single = isSingle ? isSingle : ( !common.isEmptyObject(params) ? true : false )
-        var p = single ? common.renameKey(params, { _id: 'id' }) : null
-        this._read(query, p).then(function(result) {
-            var json = single ? result[0] : result
-            res.json(json)
-        }, function(err) {
-            res.json(err)
-        })
+    read: function(req, res) {
+        var query = req.query
+        var params = req.params
+        var isSingle = params.single // 是否返回单条数据
+        var isPaging = params.limit && params.page // 是否使用分页查询
+        var isAssociated = params.associated // 是否使用联表查询
+        if (isAssociated) {
+            this._readAssociated(query).then(function (result) {
+                var json = isSingle ? result[0] : result
+                res.json(json)
+            }, function (err) {
+                res.json(err)
+            })
+        } else if (isPaging) {
+            this._readPaging(query, params).then(function (result) {
+                var json = isSingle ? result[0] : result
+                res.json(json)
+            }, function (err) {
+                res.json(err)
+            })
+        } else {
+            this._read(query).then(function(result) {
+                var json = isSingle ? result[0] : result
+                res.json(json)
+            }, function(err) {
+                res.json(err)
+            })
+        }
+
     },
     delete: function(req, res) {
         var query = req.query

@@ -9,19 +9,14 @@ var bodyParser = require('body-parser');
 var resetful = require('./resetful/index')
 //var routes = require('./system/_router')
 var  common = require('./system/common')
-var _router = require('./system/router')
+var _router = require('./system/routers')
+var installRouters = require('./install/routers')
 
 var app = express();
 
 var install = require('./install/index')
 
-/*install({
-    isRemoveAll: true
-}).then(function() {
-    console.log('done')
-}).catch(function(err) {
-    console.log(err)
-})*/
+
 
 console.log('app ready', app.ready)
 // view engine setup
@@ -44,6 +39,8 @@ app.use(function(req, res, next) {
     next()
 })
 
+app.use(installRouters)
+
 if(common.isAdmin()) {
     _router(app, {}, 'resetful')
 }
@@ -51,7 +48,14 @@ if(common.isAdmin()) {
 
 //app.use(routes)
 
-
+/*install({
+    isRemoveAll: true
+}).then(function() {
+    console.log('install done')
+    return app
+}).catch(function(err) {
+    console.log(err)
+})*/
 
 module.exports = app;
 

@@ -47,3 +47,32 @@ module.exports = {
         }
     ]
 }
+//master-slave
+
+// 映射配置
+var json = [
+    {
+        "collectionName": "mapcatagorycontent",
+        "master": "catagory",
+        "masterId": "_id=>catagoryId",
+        "slave": "article",
+        "slaveId": "_id=>contentId",
+        "contactField": "contentType"
+    },
+    {
+        "collectionName": "mapcatagorycontent",
+        "master": "catagory",
+        "masterId": "_id=>catagoryId",
+        "slave": "link",
+        "slaveId": "_id=>contentId",
+        "contactField": "contentType"
+    },
+    {
+        "collectionName": "mapcontenttag",
+        "master": "tag",
+        "masterId": "_id=>tagId",
+        "slave": "article",
+        "slaveId": "_id=>contentId",
+        "contactField": "contentType"
+    }
+    ]
