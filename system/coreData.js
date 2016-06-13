@@ -29,10 +29,11 @@ var openMode = {
     name: 'openMode',
     attribute: { type: 'String' },
     control: {
+        label: '打开方式',
         name: 'select',
-        default: '',
+        default: '_self',
         data: [
-            { text: '默认(本窗口)', value: '' },
+            { text: '默认(本窗口)', value: '_self' },
             { text: '新窗口', value: '_blank' }
         ]
     }
@@ -82,7 +83,7 @@ var data = [
         collectionName: 'api',
         fields: [
             {
-                name: '_creator',
+                name: 'creator',
                 attribute: { type: 'ObjectId' },
                 showFilter: 'empty'
             },
@@ -341,6 +342,16 @@ var data = [
         name: '文章表',
         collectionName: 'article',
         fields: [
+            {
+                name: 'catagoryId',
+                isExternal: true,
+                attribute: { type: 'ObjectId', required: true },
+                control: {
+                    label: '分类',
+                    name: 'select',
+                    data: '@catagory'
+                }
+            },
             {
                 name: 'title',
                 attribute: { type: 'String', required: true },

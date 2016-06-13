@@ -49,7 +49,7 @@ function createModel(collectionName, fields) {
     fields.forEach(function(v, i) {
         var name = v.name,
             attribute
-        if(v.attribute) {
+        if (v.attribute && !v.isExternal) {
             attribute = common.mix({}, v.attribute)
             attribute.type = map(attribute.type)
             if(attribute.default) {
