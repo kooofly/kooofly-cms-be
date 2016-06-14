@@ -62,6 +62,7 @@ var data = [
             },
             {
                 name: 'apis',
+                isExternal: true,
                 control: {
                     name: 'group-apis'
                 }
@@ -82,11 +83,6 @@ var data = [
         name: 'API表',
         collectionName: 'api',
         fields: [
-            {
-                name: 'creator',
-                attribute: { type: 'ObjectId' },
-                showFilter: 'empty'
-            },
             /*{
                 name: 'parentId',
                 attribute: { type: 'ObjectId' }
@@ -115,7 +111,7 @@ var data = [
                     default: 'api',
                     data: [
                         { text: 'api', value: 'api' },
-                        { text: 'route', value: 'route' }
+                        { text: 'router', value: 'router' }
                     ],
                     label: '类型'
                 }
@@ -143,8 +139,7 @@ var data = [
                     name: 'select',
                     data: [
                         { text: 'role', value: 'role' },
-                        { text: 'public', value: 'public' },
-                        { text: 'user', value: 'user' }
+                        { text: 'public', value: 'public' }
                     ]
                 }
             },
@@ -448,9 +443,10 @@ var data = [
             lastModifyTime
         ]
     }),
+    // 映射表 start
     createDocument({
         _id: ids.MODEL_MapRoleCatagory_ID,
-        name: '角色分类映射表',
+        name: '角色分类映射表', // 数据权限
         collectionName: 'maprolecatagory',
         fields: [
             {
@@ -460,12 +456,35 @@ var data = [
             {
                 name: 'catagoryId',
                 attribute: { type: 'ObjectId', required: true }
+            },
+            {
+                name: 'contentType',
+                attribute: { type: 'String', required: true }
+            }
+        ]
+    }),
+    createDocument({
+        _id: ids.MODEL_MapDynamicCollectionAPI_ID,
+        name: 'dynamiccollection API映射表',
+        collectionName: 'mapdynamiccollectionapi',
+        fields: [
+            {
+                name: 'dynamiccollectionId',
+                attribute: { type: 'ObjectId', required: true }
+            },
+            {
+                name: 'apiId',
+                attribute: { type: 'ObjectId', required: true }
+            },
+            {
+                name: 'contentType',
+                attribute: { type: 'String', required: true }
             }
         ]
     }),
     createDocument({
         _id: ids.MODEL_MapRoleAPI_ID,
-        name: '角色API映射表',
+        name: '角色API映射表', // resetful 资源权限
         collectionName: 'maproleapi',
         fields: [
             {
@@ -475,6 +494,10 @@ var data = [
             {
                 name: 'apiId',
                 attribute: { type: 'ObjectId', required: true }
+            },
+            {
+                name: 'contentType',
+                attribute: { type: 'String', required: true }
             }
         ]
     }),
@@ -494,13 +517,14 @@ var data = [
             {
                 name: 'contentType',
                 attribute: { type: 'String', required: true }
-            }
+            },
+            sort
         ]
     }),
     createDocument({
         _id: ids.MODEL_MapContentTag_ID,
-        name: '内容标签映射表',
-        collectionName: 'mapcontenttag',
+        name: '标签内容映射表',
+        collectionName: 'maptagcontent',
         fields: [
             {
                 name: 'tagId',
@@ -513,13 +537,14 @@ var data = [
             {
                 name: 'contentType',
                 attribute: { type: 'String', required: true }
-            }
+            },
+            sort
         ]
     }),
     createDocument({
         _id: ids.MODEL_MapContentArea_ID,
         name: '区域内容映射表',
-        collectionName: 'mapcontentarea',
+        collectionName: 'mapareacontent',
         fields: [
             {
                 name: 'areaId',
@@ -536,6 +561,7 @@ var data = [
             sort
         ]
     }),
+    // 映射表 end
     createDocument({
         name: '区域表',
         // 这个是针对内容的，用户使用 以后有ui界面，强调易用性

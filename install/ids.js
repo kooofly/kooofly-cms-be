@@ -19,5 +19,6 @@ module.exports = {
     MODEL_UserConfig_ID: objectid(),
     MODEL_SystemConfig_ID: objectid(),
     MODEL_Log_ID: objectid(),
-    MODEL_Page_ID: objectid()
+    MODEL_Page_ID: objectid(),
+    MODEL_MapDynamicCollectionAPI_ID: objectid()
 }

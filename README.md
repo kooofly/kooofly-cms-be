@@ -1,14 +1,33 @@
 特殊查询字段：
 params:
-single=1 表示返回单个数据
-limit: 10 page: 3 表示返回翻页数据
-associated=1 表示关联查询
-sort=1 表示插入排序
+_single=1 表示返回单个数据
+_limit=10&page=3 表示返回翻页数据
+_map=role_catagory 表示关联查询
+_sort=asc||desc&[sortby=sort] 表示插入排序 sortBy是可选参数 默认sortBy=sort 可以填写_id等，多个之间用“,”分割 如： _sort=asc,desc&sortby=lastModifyTime,sort
+
 
 
 排序
 分页
 改变路由机制
+
+统一数据格式：
+多数据
+{
+    result: '',
+    type: 'info || confirm || data || error || other'
+}
+单数据 直接输出
+可能的例子：
+
+    {
+        error: 'xxx'
+    }
+
+    [{}, ...]
+
+
+
 install
 
 用户管理
@@ -22,6 +41,9 @@ admin 设计
 
 
 中间映射表添加 通用配置设计
+映射表的添加，所有的字段都有限制，详见DbClass 中的 _readAssociated()
+
+
 通用映射设计：
 1.增删改查分类内容
 
