@@ -49,6 +49,7 @@ function createModel(collectionName, fields) {
     fields.forEach(function(v, i) {
         var name = v.name,
             attribute
+        // isExternal 是否是外部的字段（类似外键，但没有作外键约束）
         if (v.attribute && !v.isExternal) {
             attribute = common.mix({}, v.attribute)
             attribute.type = map(attribute.type)
