@@ -3,7 +3,7 @@ params:
 _single=1 表示返回单个数据
 _limit=10&page=3 表示返回翻页数据
 _map=role_catagory 表示关联查询
-_sort=asc||desc&[sortby=sort] 表示插入排序 sortBy是可选参数 默认sortBy=sort 可以填写_id等，多个之间用“,”分割 如： _sort=asc,desc&sortby=lastModifyTime,sort
+_sort=asc||desc&[_sortby=sort] 表示插入排序 sortby是可选参数 默认_sortby=sort 可以填写_id等，多个之间用“,”分割 如： _sort=asc,desc&_sortby=lastModifyTime,sort
 
 
 

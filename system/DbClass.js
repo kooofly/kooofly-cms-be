@@ -40,25 +40,23 @@ var DbClass = Class.extend({
             return model.find(conditions)
         })
     },
+    // 查询举例
+    /*
+    * 知道 catagory 查 content /content?catId=5
+    * 知道 catagory & type 查 content /article?catId=5
+    * 知道 content & type 查 catagory /catagory?type=article&articleId=43434
+    * */
     _readAssociated: function(conditions, query, map) {
-        var mapSplit = map.split('_')
-        var master = mapSplit[0]
-        var slave = mapSplit[1]
-        var parsingMap = {
-            associatedCollectionName: 'map' + master + slave,
-            master: master,
-            slave: slave,
-            masterId: master + 'Id',
-            slaveId: slave + 'Id',
-            contactField: 'contentType'
-        }
-        var isPaging = query._limit && query._page
-        return isPaging ?
-            this._readAssociatedPaging(conditions, query, parsingMap) :
-            this._readAssociatedNormal(conditions, query, parsingMap)
+        return common.promiseParsingMap(map, this.promiseModels).then(function (parsingMap) {
+            var isPaging = query._limit && query._page
+            return isPaging ?
+                this._readAssociatedPaging(conditions, query, parsingMap) :
+                this._readAssociatedNormal(conditions, query, parsingMap)
+        })
+        
     },
     _readAssociatedNormal: function (conditions, query, parsingMap) {
-        this.getModel(parsingMap.associatedCollectionName).then(function (model) {
+        return this.getModel(parsingMap.associatedCollectionName).then(function (model) {
             return model.find(conditions)
         }).then(function (result) {
             if(!result.length) return []
@@ -93,8 +91,8 @@ var DbClass = Class.extend({
             })
         })
     },
-    _readAssociatedPaging: function() {
-
+    _readAssociatedPaging: function(conditions, query, parsingMap) {
+        this._readAssociatedNormal(conditions, query, parsingMap)
     },
     _readPaging: function(conditions, params) {
         var limit = parseInt(params._limit, 10)
@@ -115,6 +113,24 @@ var DbClass = Class.extend({
         })
     },
     create: function(req, res, duplicateConditions) {
+        if (duplicateConditions) {
+            // 过滤重复 创建
+            this._createDuplicate(req, res, duplicateConditions)
+        } else {
+            var body = req.body
+            var map = body._map
+            if (map) {
+                // 含有关联关系的创建
+                this._createAssociated(req, res)
+            } else {
+                // 直接创建
+                this._create()
+            }
+        }
+        
+        
+        
+
         var data = req.body,
             self = this
         if(duplicateConditions) {
@@ -169,12 +185,7 @@ var DbClass = Class.extend({
         var isSingle = query._single // 是否返回单条数据
         var isPaging = query._limit && query._page // 是否使用分页查询
         var map = query._map // 是否使用联表查询
-        var q = {}
-        for (var key in query) {
-            if (!/_/.test(key) || key === '_id') {
-                q[key] = query[key]
-            }
-        }
+        var q = common.filterReserved(query)
         if (map) {
             this._readAssociated(q, query, map).then(function (result) {
                 var json = isSingle ? result[0] : result

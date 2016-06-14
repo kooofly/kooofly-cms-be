@@ -21,22 +21,3 @@ var APIs = DbClass.extend({
     }
 })
 module.exports = APIs
-
-/*
-var models = require('../../system/models')
-var apis = common.CURD(models, 'API')
-common.mix(apis, {
-    read: function(req, res) {
-        var isSingle = common.renameKey(req.params, { _id: 'id' })._id ? true : false
-        apis._read(req, res, isSingle)
-    },
-    create: function(req, res) {
-        var query = {
-            uri: req.body.uri,
-            method: req.body.method,
-            owner: req.body.owner
-        }
-        apis._create(req, res)
-    }
-})
-module.exports = apis*/
