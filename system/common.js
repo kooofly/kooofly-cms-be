@@ -90,6 +90,16 @@ module.exports = {
             }
             return result
         })
+    },
+    // 过滤不需要的key
+    filterKey: function (o, removeKey) {
+        var result = {}
+        for (var key in o) {
+            if(removeKey !== key) {
+                result[key] = o[key]
+            }
+        }
+        return result
     }
 
 }

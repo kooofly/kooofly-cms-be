@@ -80,7 +80,7 @@ var APIs = DbClass.extend({
         }).then(function(result) {
             var _creator = result._id,
                 apis = data.apis ? JSON.parse(data.apis) : []
-            if(apis.length) {
+            if (apis.length) {
                 apis.forEach(function(v, i) {
                     v._creator = _creator
                 })

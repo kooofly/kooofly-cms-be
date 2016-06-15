@@ -149,7 +149,8 @@ var DbClass = Class.extend({
             var slaveInsert = data[_insert]
             common.promiseParsingMap(map, this.promiseModels).then(function (parsingMap) {
                 var promiseMaster = self.getModel(parsingMap.master).then(function (model) {
-                    return model.create(data)
+                    var d = common.filterKey(data, _insert)
+                    return model.create(d)
                 })
                 var promiseSlave = self.getModel(parsingMap.slave).then(function (model) {
                     return model.create(slaveInsert)
@@ -181,7 +182,8 @@ var DbClass = Class.extend({
             common.promiseParsingMap(map, this.promiseModels).then(function (parsingMap) {
                 self.getModel(parsingMap.slave).then(function (model) {
                     // 插入 slave 数据
-                    model.create(data).then(function (resultSlave) {
+                    var d = common.filterKey(data, parsingMap.masterId)
+                    model.create(d).then(function (resultSlave) {
                         var doc = {}
                         doc[parsingMap.masterId] = data[parsingMap.masterId]
                         doc[parsingMap.slaveId] = resultSlave._id
@@ -235,34 +237,39 @@ var DbClass = Class.extend({
                 // 查slave
                 model.find(conditions).then(function (result) {
                     if (result.length) {
-                        var json = result[0]._doc
+                        var json = common.mix({}, result[0]._doc)
                         var mapConditions = {}
                         mapConditions[parsingMap.slaveId] = json._id
                         self.getModel(parsingMap.mapCollectionName).then(function (modelMap) {
                             // 查map master-slave
                             modelMap.find(mapConditions).then(function (resultMap) {
-                                var masterConditions = {}
-                                masterConditions['_id'] = resultMap[parsingMap.masterId]
-                                self.getModel(parsingMap.master).then(function (modelMaster) {
-                                    // 查master
-                                    modelMaster.find(masterConditions).then(function (resultMaster) {
-                                        var singleMaster
-                                        if(resultMaster && resultMaster.length) {
-                                            singleMaster = resultMaster[0]
-                                            for (var key in singleMaster) {
-                                                if(fields.indexOf(key) !== -1) {
-                                                    if(key !== '_id') {
-                                                        json[key] = singleMaster[key]
-                                                    } else {
-                                                        json[parsingMap.masterId] = singleMaster[key]
-                                                    }
+                                if(resultMap && resultMap.length) {
+                                    var masterConditions = {}
+                                    masterConditions['_id'] = resultMap[0][parsingMap.masterId]
+                                    self.getModel(parsingMap.master).then(function (modelMaster) {
+                                        // 查master
+                                        modelMaster.find(masterConditions).then(function (resultMaster) {
+                                            var singleMaster
+                                            if(resultMaster && resultMaster.length) {
+                                                singleMaster = resultMaster[0]
+                                                for (var key in singleMaster) {
+                                                    if(fields.indexOf(key) !== -1) {
+                                                        if(key !== '_id') {
+                                                            json[key] = singleMaster[key]
+                                                        } else {
+                                                            json[parsingMap.masterId] = singleMaster[key]
+                                                        }
 
+                                                    }
                                                 }
                                             }
-                                        }
-                                        res.json(json)
+                                             res.json(json)
+                                        })
                                     })
-                                })
+                                } else {
+                                    res.json(json)
+                                }
+
                             })
                         })
                     }
