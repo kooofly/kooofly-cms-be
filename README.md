@@ -4,8 +4,8 @@ _single=1 表示返回单个数据
 _limit=10&page=3 表示返回翻页数据
 _map=role_catagory 表示关联查询
 _sort=asc||desc&[_sortby=sort] 表示插入排序 sortby是可选参数 默认_sortby=sort 可以填写_id等，多个之间用“,”分割 如： _sort=asc,desc&_sortby=lastModifyTime,sort
-
-
+_insert=apis 关系插入时使用 见DbClass _createAssociated()
+关联查询 _fields=xyz,uyu _pattern=onetoone ||onetomany 默认 onetoone
 
 排序
 分页

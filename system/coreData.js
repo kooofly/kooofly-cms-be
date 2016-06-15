@@ -285,6 +285,16 @@ var data = [
         collectionName: 'link',
         fields: [
             {
+                name: 'catagoryId',
+                isExternal: true,
+                attribute: { type: 'ObjectId', required: true },
+                control: {
+                    label: '分类',
+                    name: 'select',
+                    data: '@catagory'
+                }
+            },
+            {
                 name: 'title',
                 attribute: { type: 'String', required: true },
                 control: {
@@ -310,7 +320,7 @@ var data = [
                 }
             },
             {
-                name: 'logo',
+                name: '     ',
                 attribute: { type: 'String' },
                 control: {
                     name: 'upload',

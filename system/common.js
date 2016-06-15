@@ -69,21 +69,22 @@ module.exports = {
     promiseParsingMap: function (map, promiseModels) {
         var mapSplit = map.split('_')
         var master = mapSplit[0]
-        var slave = mapSplit[1]
+        var slave = mapSplit[2] ? mapSplit[2] : mapSplit[1]
+        var dbKey = mapSplit[1]
         return promiseModels.then(function (models) {
             var result = {
                 master: master,
                 slave: slave,
                 masterId: master + 'Id',
-                slaveId: slave + 'Id',
+                slaveId: dbKey + 'Id',
                 contactField: 'contentType'
             }
-            var possibleColl = 'map' + master + slave
-            var possibleCollReverse = 'map' + slave + master
+            var possibleColl = 'map' + master + dbKey
+            var possibleCollReverse = 'map' + dbKey + master
             if(models[possibleColl]) {
-                result['collectionName'] = possibleColl
+                result['mapCollectionName'] = possibleColl
             } else if (models[possibleCollReverse]) {
-                result['collectionName'] = possibleCollReverse
+                result['mapCollectionName'] = possibleCollReverse
             } else {
                 console.log('promiseParsingMap error')
             }

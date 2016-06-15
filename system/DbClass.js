@@ -42,9 +42,9 @@ var DbClass = Class.extend({
     },
     // 查询举例
     /*
-    * 知道 catagory 查 content /content?catId=5
-    * 知道 catagory & type 查 content /article?catId=5
-    * 知道 content & type 查 catagory /catagory?type=article&articleId=43434
+    * 知道 catagory 查 content  get /content?catId=5
+    * 知道 catagory & type 查 content  get /article?catId=5
+    * 知道 content & type 查 catagory  get /catagory?type=article&articleId=43434
     * */
     _readAssociated: function(conditions, query, map) {
         return common.promiseParsingMap(map, this.promiseModels).then(function (parsingMap) {
@@ -56,7 +56,7 @@ var DbClass = Class.extend({
         
     },
     _readAssociatedNormal: function (conditions, query, parsingMap) {
-        return this.getModel(parsingMap.associatedCollectionName).then(function (model) {
+        return this.getModel(parsingMap.mapCollectionName).then(function (model) {
             return model.find(conditions)
         }).then(function (result) {
             if(!result.length) return []
@@ -112,55 +112,110 @@ var DbClass = Class.extend({
             console.log(err)
         })
     },
+    _createDuplicate: function (req, res, duplicateConditions) {
+        var data = req.body
+        this.getModel().then(function(model) {
+            model.find(duplicateConditions, function(err, result) {
+                if(result.length) {
+                    res.json({
+                        message: msgs.dataExist,
+                        duplicateConditions: duplicateConditions,
+                        model: self.key,
+                        documentation_url: msgs.docUrl
+                    })
+                    return
+                }
+                self._create(data).then(function(result) {
+                    res.json(result)
+                }, function(err) {
+                    res.json(err)
+                })
+            })
+        })
+    },
+    /*
+    * 1.【插master & slave】同时插入两个 返回的数据插入映射表 post /collection?_map=dyncoll_api&_insert=apis
+    * 2.【插slave】知道masterId 插入slave 返回的slaveId 插入映射表 post /article?_map=cat_art&_masterId=catagoryId。
+     * 如果3不存在 就不需要_masterId=catagoryId
+     * 现在不考虑3的情况
+     * 如果以后出现3的情况，则处理成：没有_masterId 则自动默认_masterId，这样做到兼容
+    * 3.（可能不存在这个场景,先不考虑）知道slaveId 插入master，返回的masterId 插入映射表
+    * */
+    _createAssociated: function (req, res, map) {
+        var data = req.body
+        var self = this
+        var _insert = req.query._insert
+        if(_insert) {
+            var slaveInsert = data[_insert]
+            common.promiseParsingMap(map, this.promiseModels).then(function (parsingMap) {
+                var promiseMaster = self.getModel(parsingMap.master).then(function (model) {
+                    return model.create(data)
+                })
+                var promiseSlave = self.getModel(parsingMap.slave).then(function (model) {
+                    return model.create(slaveInsert)
+                })
+                // 插入 master slave 数据
+                Promise.all([
+                    promiseMaster,
+                    promiseSlave
+                ]).then(function (resultAll) {
+                    var insertedMaster = resultAll[0]
+                    var insertedSlave = resultAll[1]
+                    // 插入关联数据
+                    self.getModel(parsingMap.mapCollectionName).then(function(model) {
+                        var d = []
+                        insertedSlave.forEach(function (v, i) {
+                            var doc = {}
+                            doc[parsingMap.masterId] = insertedMaster._id
+                            doc[parsingMap.slaveId] = v._id
+                            doc[parsingMap.contactField] = parsingMap.slave
+                            d.push(doc)
+                        })
+                        model.create(d).then(function (result) {
+                            res.json(result)
+                        })
+                    })
+                })
+            })
+        } else {
+            common.promiseParsingMap(map, this.promiseModels).then(function (parsingMap) {
+                self.getModel(parsingMap.slave).then(function (model) {
+                    // 插入 slave 数据
+                    model.create(data).then(function (resultSlave) {
+                        var doc = {}
+                        doc[parsingMap.masterId] = data[parsingMap.masterId]
+                        doc[parsingMap.slaveId] = resultSlave._id
+                        doc[parsingMap.contactField] = parsingMap.slave
+                        // 插入关联数据
+                        self.getModel(parsingMap.mapCollectionName).then(function (model) {
+                            model.create(doc).then(function(result) {
+                                res.json(result)
+                            })
+                        })
+                    })
+                })
+            })
+        }
+    },
     create: function(req, res, duplicateConditions) {
         if (duplicateConditions) {
             // 过滤重复 创建
             this._createDuplicate(req, res, duplicateConditions)
         } else {
             var body = req.body
-            var map = body._map
+            var map = req.query._map
             if (map) {
                 // 含有关联关系的创建
-                this._createAssociated(req, res)
+                this._createAssociated(req, res, map)
             } else {
                 // 直接创建
-                this._create()
+                this._create(body).then(function(result) {
+                    res.json(result)
+                }, function(err) {
+                    res.json(err)
+                })
             }
         }
-        
-        
-        
-
-        var data = req.body,
-            self = this
-        if(duplicateConditions) {
-            this.getModel().then(function(model) {
-                model.find(duplicateConditions, function(err, result) {
-                    if(result.length) {
-                        res.json({
-                            message: msgs.dataExist,
-                            duplicateConditions: duplicateConditions,
-                            model: self.key,
-                            documentation_url: msgs.docUrl
-                        })
-                        return
-                    }
-                    self._create(data).then(function(result) {
-                        res.json(result)
-                    }, function(err) {
-                        res.json(err)
-                    })
-                })
-            })
-
-        } else {
-            this._create(data).then(function(result) {
-                res.json(result)
-            }, function(err) {
-                res.json(err)
-            })
-        }
-
     },
     update: function(req, res) {
         var data = req.body
@@ -168,6 +223,57 @@ var DbClass = Class.extend({
         this._update(conditions, data).then(function(result) {
             res.json(result)
         })
+    },
+    readAssociatedPaging: function () {
+
+    },
+    readAssociatedOneToOne: function (req, res, conditions, map) {
+        var self = this
+        var fields = req.query._fields ? req.query._fields.split(',') : ['_id']
+        common.promiseParsingMap(map, this.promiseModels).then(function (parsingMap) {
+            self.getModel().then(function (model) {
+                // 查slave
+                model.find(conditions).then(function (result) {
+                    if (result.length) {
+                        var json = result[0]._doc
+                        var mapConditions = {}
+                        mapConditions[parsingMap.slaveId] = json._id
+                        self.getModel(parsingMap.mapCollectionName).then(function (modelMap) {
+                            // 查map master-slave
+                            modelMap.find(mapConditions).then(function (resultMap) {
+                                var masterConditions = {}
+                                masterConditions['_id'] = resultMap[parsingMap.masterId]
+                                self.getModel(parsingMap.master).then(function (modelMaster) {
+                                    // 查master
+                                    modelMaster.find(masterConditions).then(function (resultMaster) {
+                                        var singleMaster
+                                        if(resultMaster && resultMaster.length) {
+                                            singleMaster = resultMaster[0]
+                                            for (var key in singleMaster) {
+                                                if(fields.indexOf(key) !== -1) {
+                                                    if(key !== '_id') {
+                                                        json[key] = singleMaster[key]
+                                                    } else {
+                                                        json[parsingMap.masterId] = singleMaster[key]
+                                                    }
+
+                                                }
+                                            }
+                                        }
+                                        res.json(json)
+                                    })
+                                })
+                            })
+                        })
+                    }
+
+                })
+            })
+
+        })
+    },
+    readAssociatedOneToMany: function (req, res, conditions, map) {
+
     },
     /*
     * read
@@ -185,8 +291,19 @@ var DbClass = Class.extend({
         var isSingle = query._single // 是否返回单条数据
         var isPaging = query._limit && query._page // 是否使用分页查询
         var map = query._map // 是否使用联表查询
+        var pattern = query._pattern //查询模式 一对一 || 一对多
         var q = common.filterReserved(query)
         if (map) {
+            if (isPaging) {
+                this.readAssociatedPaging(req, res, q, map)
+            } else {
+                if (!pattern || pattern === 'onetoone') {
+                    this.readAssociatedOneToOne(req, res, q, map)
+                } else {
+                    this.readAssociatedOneToMany(req, res, q, map)
+                }
+            }
+            return
             this._readAssociated(q, query, map).then(function (result) {
                 var json = isSingle ? result[0] : result
                 res.json(json)
