@@ -1,6 +1,6 @@
 var objectid = require('objectid')
 var common = require('../../system/common')
-// 映射配置
+
 module.exports = {
     installer: 'systemconfig',
     data: [
@@ -44,76 +44,11 @@ module.exports = {
                     }
                 }
             }
-        },
-        {
-            code: 'associated',
-            config: {
-                "collectionName": "maprolecatagory",
-                "master": "role",
-                "masterId": "_id=>roleId",
-                "slave": "catagory",
-                "slaveId": "_id=>catagoryId"
-            },
-            description: 'maprolecatagory'
-        },
-        {
-            code: 'associated',
-            config: {
-                "collectionName": "mapdynamiccollectionapi",
-                "master": "dynamiccollection",
-                "masterId": "_id=>dynamiccollectionId",
-                "slave": "api",
-                "slaveId": "_id=>apiId"
-            },
-            description: 'mapdynamiccollectionapi'
-        },
-        {
-            code: 'associated',
-            config: {
-                "collectionName": "maproleapi",
-                "master": "role",
-                "masterId": "_id=>roleId",
-                "slave": "api",
-                "slaveId": "_id=>apiId"
-            },
-            description: 'maproleapi'
-        },
-        {
-            code: 'associated',
-            config: {
-                "collectionName": "mapcatagorycontent",
-                "master": "catagory",
-                "masterId": "_id=>catagoryId",
-                "slave": "@contactField",
-                "slaveId": "_id=>contentId",
-                "contactField": "contentType"
-            },
-            description: 'mapcatagorycontent'
-        },
-        {
-            code: 'associated',
-            config: {
-                "collectionName": "maptagcontent",
-                "master": "tag",
-                "masterId": "_id=>tagId",
-                "slave": "@contactField",
-                "slaveId": "_id=>contentId",
-                "contactField": "contentType"
-            },
-            description: 'maptagcontent'
-        },
-        {
-            code: 'associated',
-            config: {
-                "collectionName": "mapareacontent",
-                "master": "area",
-                "masterId": "_id=>areaId",
-                "slave": "@contactField",
-                "slaveId": "_id=>contentId",
-                "contactField": "contentType"
-            },
-            description: 'mapareacontent'
         }
     ]
 }
-// master-slave
+// menu 包含模型配置  用于菜单权限操作
+var configMenuCollection = {
+    menu: 'id',
+    collections: [1,2,3]
+}

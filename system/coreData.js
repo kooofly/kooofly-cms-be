@@ -15,7 +15,8 @@ var isEnable = {
     attribute: { type: 'Boolean', required: true },
     control: {
         name: 'radio-boolean',
-        label: '是否启用'
+        label: '是否启用',
+        default: 1
     }
 }
 var lastModifyTime = {
@@ -265,6 +266,15 @@ var data = [
             {
                 name: 'type',
                 attribute: { type: 'String' }, //栏目类型，可能废弃，因为智能添加模型（template 添加模型）更灵活  page || null || menu
+            },
+            {
+                name: 'code',
+                attribute: { type: 'String' },
+                control: {
+                    name: 'text',
+                    label: '栏目Code',
+                    placeholder: '唯一性的code，可以看做是自定义的id，可以用作频道建设等'
+                }
             },
             isEnable,
             {
