@@ -16,9 +16,6 @@ var app = express();
 
 var install = require('./install/index')
 
-
-
-console.log('app ready', app.ready)
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
