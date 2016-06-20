@@ -1,16 +1,23 @@
 //var models = require('../system/models')
 var fs = require('fs')
+var toString = Object.prototype.toString
 module.exports = {
-    isEmptyObject: function(o) {
-        if ( !o || Object.prototype.toString.call( o ) !== "[object Object]" || !o.hasOwnProperty ) {
+    isObject: function (value) {
+        return toString.call( value ) === "[object Object]"
+    },
+    isArray: function (value) { return toString.call(value) === '[object Array]' },
+    isEmptyObject: function (value) {
+        if ( !value || toString.call(value) !== "[object Object]" || !value.hasOwnProperty ) {
             return false
         }
 
-        for ( var p in o ) {
-            if ( o.hasOwnProperty( p ) ) return false
+        for (var p in value) {
+            if (value.hasOwnProperty(p)) return false
         }
         return true
     },
+    isDefined: function (value) { return typeof value !== 'undefined' },
+    isUndefined: function (value) { return typeof value === 'undefined' },
     mix: function(o) {
         var i = 1,
             l = arguments.length
@@ -86,9 +93,14 @@ module.exports = {
             } else if (models[possibleCollReverse]) {
                 result['mapCollectionName'] = possibleCollReverse
             } else {
-                console.log('promiseParsingMap error')
+                console.log('promiseParsingMap error', map)
             }
             return result
+        })
+    },
+    upperFirstLetter: function (str) {
+        return str.replace(/\b\w+\b/g, function(word) {
+            return word.substring(0,1).toUpperCase( ) +  word.substring(1)
         })
     },
     // 过滤不需要的key

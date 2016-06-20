@@ -46,11 +46,12 @@ var CoreDispatch = Class.extend({
         })()
         return promiseApis.then(function (apis) {
             return new Promise(function (resolve, reject) {
+                var inst = apis[pathKeys[0]]
                 var o = this.searchPath(apis, pathKeys.concat([]))
-                // 支持 /collection/method，如果链接中包含有method 则忽略req.method
+                // 支持 /collection/method，如果链接中包含有method 也可能会忽略req.method
                 var fn = o && (typeof o === 'function' ? o : o[method])
                 if (typeof fn === 'function') {
-                    resolve(fn)
+                    resolve(fn, inst)
                 } else {
                     // TODO msgs
                     var err = new Error('Not Found')
@@ -71,16 +72,18 @@ var CoreDispatch = Class.extend({
     // TODO
     // uri resource权限检测
     // 缓存所有的角色信息 不从数据库查询 提升性能
-    uriResourceCheck: function () {
+    uriResourceCheck: function (req, params) {
+        var self = this
         return new Promise(function (resolve, reject) {
             resolve(true)
         })
     },
     // TODO
     // [request 数据合法性检测]
-    isRequestLegal: function () {
+    isRequestLegal: function (req, params) {
+        var self = this
         return new Promise(function (resolve, reject) {
-            resolve(true)
+            resolve(self.mixReq(req, params))
         })
     },
     // TODO
@@ -98,12 +101,26 @@ var CoreDispatch = Class.extend({
         }, 3000)
     },
     // 处理数据
-    cookingData: function () {
-
+    cookingData: function (result, params) {
+        if(params.single && result.length) {
+            return result[0]
+        }
     },
     // 字段过滤 查询的时候需要
     fieldsFilter: function () {
 
+    },
+    // req params 合并
+    mixReq: function (req) {
+        var p = this.params
+        if (common.isObject(p)) {
+            var query = p.query
+            var body = p.body
+            var params = p.params
+            query && common.mix(req.query, query)
+            body && common.mix(req.body, body)
+            params && common.mix(req.params, params)
+        }
     },
     // 创建操作日志
     createLog: function () {

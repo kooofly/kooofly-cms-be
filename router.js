@@ -17,7 +17,7 @@ module.exports = function(req, res, next) {
      *   暂时不做 moduleCheck uriResourceCheck isRequestLegal refreshCache
      * */
 
-    coreDispatch.isNot404(req, res).then(function (handler) {
+    coreDispatch.isNot404(req, res).then(function (handler, inst) {
         // 角色api权限检测 模块权限检测
         // 缓存所有的api 不从数据库查询 提升性能
         return coreDispatch.moduleCheck().then(function (module) {
@@ -25,18 +25,18 @@ module.exports = function(req, res, next) {
             // 缓存所有的角色信息 不从数据库查询 提升性能
             return coreDispatch.uriResourceCheck().then(function (uri) {
                 // [request 数据合法性检测]
-                return coreDispatch.isRequestLegal().then(function () {
+                return coreDispatch.isRequestLegal(req, inst.params).then(function (mixReq) {
                     if (method === 'PUT') {
-                        return coreDispatch.versionCheck(req).then(function () {
-                            return handler(req, res).then(function (result) {
+                        return coreDispatch.versionCheck(mixReq).then(function () {
+                            return handler(mixReq, res).then(function (result, params) {
                                 coreDispatch.createLog(result)
-                                return coreDispatch.cookingData(result)
+                                return coreDispatch.cookingData(result, params)
                             })
                         })
                     } else {
-                        return handler(req, res).then(function (result) {
+                        return handler(mixReq, res).then(function (result, params) {
                             coreDispatch.createLog(result)
-                            return coreDispatch.cookingData(result)
+                            return coreDispatch.cookingData(result, params)
                         })
                     }
                 })
