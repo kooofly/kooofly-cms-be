@@ -6,22 +6,65 @@ var config = require('../system/config')
 var msgs = config[config.lang]
 
 var API = Class.extend({
-    promiseModels: promiseModels,
-    ctor: function(modelName, params) {
+    _promiseModels: promiseModels,
+    mapMethod: {
+        GET: 'read',
+        POST: 'create',
+        PUT: 'update',
+        DELETE: 'delete'
+    },
+    ctor: function(modelName, params, options) {
+        // this._initFn(options.fns)
+        // this.__v = options.__v
         this.modelName = modelName
-        this.model = this.promiseModels.then(function(models) {
+        this.model = this._promiseModels.then(function(models) {
             return models[modelName]
         })
         this.params = params || {}
-    },
-    getModel: function(modelName) {
+        // TODO DEBUG 数据
         var self = this
-        return this.promiseModels.then(function(models) {
+        var array = ['read', 'create', 'update', 'delete']
+        var tips = modelName + ': '
+        array.forEach(function (v, i) {
+            tips += v + ':' + (typeof self[v]) + ' | '
+        })
+        console.log('ApiCreater', tips)
+    },
+    // 权限 api控制相关 设置方法集
+    _initFn: function (fns) {
+        if (!fns) return
+        var self = this
+        var fnObject = (function () {
+            var result = {}
+            fns.split(',').forEach(function (v, i) {
+                var key = v.toUpperCase()
+                if (self.mapMethod[key]) {
+                    result[self.mapMethod[key]] = 1
+                } else {
+                    // 过滤 第一个字符是 _ 的单词 防止调用私有方法
+                    if (!/^_{1}/.test(v)) {
+                        result[v] = 1
+                    }
+                }
+            })
+            return result
+        })()
+
+        var myFn = ['read', 'create', 'update', 'delete']
+        myFn.forEach(function (v, i) {
+            if (!fnObject[v]) {
+                self[v] = null
+            }
+        })
+    },
+    _getModel: function(modelName) {
+        var self = this
+        return this._promiseModels.then(function(models) {
             return models[modelName || self.modelName]
         })
     },
     // 重复提交检测
-    duplicateCheck: function (data, modelName) {
+    _duplicateCheck: function (data, modelName) {
         var duplicate = this.params.duplicate
         var model = modelName || this.modelName
         if (!duplicate || !duplicate[model]) {
@@ -52,7 +95,7 @@ var API = Class.extend({
         }
     },
     // 查询条件 limit skip sort 等
-    optionsFielter: function (query) {
+    _optionsFielter: function (query) {
         var result = {}
         if (query._limit && query._page) {
             var limit = parseInt(_limit, 10)
@@ -63,12 +106,12 @@ var API = Class.extend({
         return result
     },
     // 字段过滤 查询的时候需要
-    projectionTransition: function (projection, index) {
-        var temp = projection.split('|')
-        return temp[index] ? temp[index].replace(/,/g, ' ') : null
+    _projectionTransition: function (projection, index) {
+        var temp = projection && projection.split('|')
+        return temp && temp[index] ? temp[index].replace(/,/g, ' ') : null
     },
     // 处理数据 统一数据返回格式
-    processor: function (value) {
+    _processor: function (value) {
         return {
             result: value,
             processor: this.params.processor
@@ -92,22 +135,22 @@ var API = Class.extend({
 
     },*/
     _create: function (data, modelName) {
-        return this.getModel(modelName).then(function(model) {
+        return this._getModel(modelName).then(function(model) {
             return model.create(data)
         })
     },
     _delete: function(conditions) {
-        return this.getModel().then(function(model) {
+        return this._getModel().then(function(model) {
             return model.remove(conditions)
         })
     },
     _update: function(conditions, data, modelName) {
-        return this.getModel(modelName).then(function(model) {
+        return this._getModel(modelName).then(function(model) {
             return model.update(conditions, data)
         })
     },
     _read: function(params, modelName) {
-        return this.getModel(modelName).then(function(model) {
+        return this._getModel(modelName).then(function(model) {
             // projection 字段 options 分页排序等条件
             return model.find(params.conditions, params.projection, params.options)
         })
@@ -120,14 +163,14 @@ var API = Class.extend({
      * 如果以后出现3的情况，则处理成：没有_masterId 则自动默认_masterId，这样做到兼容
      * 3.（可能不存在这个场景,先不考虑）知道slaveId 插入master，返回的masterId 插入映射表
      * */
-    createMasterSlaveMap: function (data, waitingMap, slave) {
+    _createMasterSlaveMap: function (data, waitingMap, slave) {
         var self = this
         var slaveData = data[slave]
-        return common.promiseParsingMap(waitingMap, this.promiseModels).then(function (map) {
-            var promiseMaster = this.duplicateCheck(data).then(function() {
+        return common.promiseParsingMap(waitingMap, this._promiseModels).then(function (map) {
+            var promiseMaster = this._duplicateCheck(data).then(function() {
                 return self._create(common.filterKey(data, slave), map.master)
             })
-            var promiseSlave = this.duplicateCheck(data, map.slave).then(function() {
+            var promiseSlave = this._duplicateCheck(data, map.slave).then(function() {
                 return self._create(slaveData, map.slave)
             })
             // 插入 master slave 数据
@@ -150,10 +193,10 @@ var API = Class.extend({
             })
         })
     },
-    createSlaveMap: function (data, waitingMap) {
+    _createSlaveMap: function (data, waitingMap) {
         var self = this
-        return common.promiseParsingMap(waitingMap, this.promiseModels).then(function (map) {
-            return this.duplicateCheck(data).then(function() {
+        return common.promiseParsingMap(waitingMap, this._promiseModels).then(function (map) {
+            return this._duplicateCheck(data).then(function() {
                 // 插入 slave 数据
                 var d = common.filterKey(data, map.masterId)
                 return self._create(d).then(function (resultSlave) {
@@ -173,27 +216,29 @@ var API = Class.extend({
         var waitingMap = req.query._map
         if (waitingMap) {
             if (slave) {
-                return this.createMasterSlaveMap(data, waitingMap, slave).then(function (result) {
-                    return this.processor(result)
+                return this._createMasterSlaveMap(data, waitingMap, slave).then(function (result) {
+                    return this._processor(result)
                 })
             } else {
-                return this.createSlaveMap(data, waitingMap).then(function (result) {
-                    return this.processor(result)
+                return this._createSlaveMap(data, waitingMap).then(function (result) {
+                    return this._processor(result)
                 })
             }
         } else {
-            return this.duplicateCheck(data).then(function() {
+            return this._duplicateCheck(data).then(function() {
                 return this._create(data).then(function(result) {
-                    return this.processor(result)
+                    return this._processor(result)
                 })
             })
         }
     },
     delete: function (req) {},
-    updateOnetoOne: function (conditions, data, map) {
+    _updateOnetoOne: function (conditions, data, map) {
 
     },
-    updateOnetoMany: function () {},
+    _updateOnetoMany: function (conditions, data, map) {
+
+    },
     update: function (req) {
         var query = req.query
         var data = req.body
@@ -201,31 +246,31 @@ var API = Class.extend({
         var pattern = query._pattern // 查询模式 一对一 || 一对多
         if (map) {
             if (!pattern || pattern === 'onetoone') {
-                return this.updateOnetoOne(query, data, map).then(function (result) {
-                    return this.processor(result)
+                return this._updateOnetoOne(query, data, map).then(function (result) {
+                    return this._processor(result)
                 })
             } else if (pattern === 'onetomany') {
-                return this.updateOnetoMany(query, data, map).then(function (result) {
-                    return this.processor(result)
+                return this._updateOnetoMany(query, data, map).then(function (result) {
+                    return this._processor(result)
                 })
             }
         } else {
             return this._update(query, data).then(function (result) {
-                return this.processor(result)
+                return this._processor(result)
             })
         }
     },
-    readParams: function (query, projectionIndex) {
+    _readParams: function (query, projectionIndex) {
         return {
             conditions: common.filterReserved(query),
-            projection: this.projectionTransition(query._projection, projectionIndex || 0),
-            options: this.optionsFielter(query)
+            projection: this._projectionTransition(query._projection, projectionIndex || 0),
+            options: this._optionsFielter(query)
         }
     },
-    readOnetoOne: function (query, waitingMap) {
+    _readOnetoOne: function (query, waitingMap) {
         var self = this
-        return common.promiseParsingMap(waitingMap, this.promiseModels).then(function (map) {
-            var params = this.readParams(query)
+        return common.promiseParsingMap(waitingMap, this._promiseModels).then(function (map) {
+            var params = this._readParams(query)
             return self._read(params).then(function (result) {
                 if (result.length) {
                     var json = common.mix({}, result[0]._doc)
@@ -234,10 +279,10 @@ var API = Class.extend({
                     }
                     mapParams.conditions[map.slaveId] = json._id
                     return self._read(mapParams, map.mapCollectionName).then(function (resultMap) {
-                        if(resultMap && resultMap.length) {
+                        if (resultMap && resultMap.length) {
                             var masterParams = {
                                 conditions: {},
-                                projection: this.projectionTransition(query._projection, 1) || '_id'
+                                projection: this._projectionTransition(query._projection, 1) || '_id'
                             }
                             masterParams.conditions['_id'] = resultMap[0][map.masterId]
                             return self._read(masterParams, map.master).then(function (resultMaster) {
@@ -245,7 +290,7 @@ var API = Class.extend({
                                 if(resultMaster && resultMaster.length) {
                                     singleMaster = resultMaster[0]
                                     for (var key in singleMaster) {
-                                        if(key === '_id') {
+                                        if (key === '_id') {
                                             json[map.masterId] = singleMaster[key]
                                         } else {
                                             json[map.master + common.upperFirstLetter(key)] = singleMaster[key]
@@ -255,46 +300,105 @@ var API = Class.extend({
                                 return json
                             })
                         } else {
-                            console.log('apicreater readOnetoOne map null')
+                            console.log('apicreater _readOnetoOne map null')
                             return json
                         }
                     })
                 } else {
-                    console.log('apicreater readOnetoOne null')
+                    console.log('apicreater _readOnetoOne null')
                     return null
                 }
             })
         })
     },
-    readOnetoMany: function (conditions, query) {
-
+    _readOnetoMany: function (query, waitingMap) {
+        var self = this
+        return common.promiseParsingMap(waitingMap, this._promiseModels).then(function (map) {
+            var params = this._readParams(query)
+            return self._read(params).then(function (result) {
+                if(result.length) {
+                    var json = common.mix({}, result[0]._doc)
+                    var mapParams = {
+                        conditions: {}
+                    }
+                    mapParams.conditions[map.masterId] = json._id
+                    return self._read(mapParams, map.mapCollectionName).then(function (resultMap) {
+                        if (resultMap && resultMap.length) {
+                            var slaveParams = {
+                                conditions: [],
+                                projection: this._projectionTransition(query._projection, 1)
+                            }
+                            resultMap.forEach(function (v, i) {
+                                slaveParams.conditions.push(v['_id'])
+                            })
+                            return self._read(slaveParams, map.slave).then(function (resultSlave) {
+                                if (resultSlave && resultSlave.length) {
+                                    json[map.slave] = resultSlave
+                                }
+                                return json
+                            })
+                        } else {
+                            return json
+                        }
+                    })
+                } else {
+                    console.log('apicreater _readOnetoMany null')
+                    return null
+                }
+            })
+        })
     },
-    readSimple: function(query) {
-        var params = this.readParams(query)
+    _readSimple: function(query) {
+        var params = this._readParams(query)
         return this._read(params)
     },
     read: function (req) {
+        var self = this
         var query = req.query
         var map = query._map // 是否使用联表查询
         var pattern = query._pattern // 查询模式 一对一 || 一对多
         var single = query._single // 是否返回单条数据
+        // 服务器端配置覆盖客户端配置
+        // TODO 优化 findOne
         if (this.params.processor && common.isUndefined(this.params.processor.single) && common.isDefined(single)) {
             this.params.processor.single = single
+        } else {
+            if (common.isDefined(single)) {
+                if (!this.params.processor) {
+                    this.params.processor = {}
+                }
+                this.params.processor['single'] = single
+            }
         }
         if (map) {
             if (!pattern || pattern === 'onetoone') {
-                return this.readOnetoOne(query, map).then(function (result) {
-                    return this.processor(result)
+                return this._readOnetoOne(query, map).then(function (result) {
+                    return self._processor(result)
                 })
             } else if (pattern === 'onetomany') {
-                return this.readOnetoMany(query, map).then(function (result) {
-                    return this.processor(result)
+                return this._readOnetoMany(query, map).then(function (result) {
+                    return self._processor(result)
                 })
             }
         } else {
-            return this.readSimple(query).then(function (result) {
-                return this.processor(result)
+            return this._readSimple(query).then(function (result) {
+                return self._processor(result)
             })
+        }
+    },
+    _install: function (data, key, isRemoveAll) {
+        var self = this
+        var installer = function () {
+            return self._create(data).then(function () {
+                return key
+            })
+        }
+        if (isRemoveAll) {
+            return self._delete({}).then(function () {
+                return installer()
+            })
+        } else {
+            return installer()
         }
     }
 })

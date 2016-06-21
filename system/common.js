@@ -112,5 +112,28 @@ module.exports = {
             }
         }
         return result
-    }    
+    },
+    promiseApis: function (promiseModels, successCall, API, customApis) {
+        // 重复 new API 会导致 _maxListeners 的问题 TODO 销毁 api listeners对象
+        return promiseModels.then(function (models) {
+            return models['api'].find().then(function (result) {
+                result.forEach(function (v) {
+                    var apiName = v.uri
+                    var apiModule = v.module || v.uri
+                    // 修改 API 时 更新 API 这里可能会导致 _maxListeners 问题 TODO 删除 API 时 更新 api
+                    if(!global.apis[apiName] || (v.__v !== global.apis[apiName].__v)) {
+                        var MayBeAPI = customApis[apiName]
+                        if(MayBeAPI) {
+                            global.apis[apiName] = new MayBeAPI(apiModule, v.config, { fns: v.method, __v: v.__v })
+                        } else {
+                            global.apis[apiName] = new API(apiModule, v.config, { fns: v.method, __v: v.__v })
+                        }
+                    }
+                })
+                return successCall(global.apis)
+            }, function (err) {
+                console.log('promiseApis', err)
+            })
+        })
+    }
 }

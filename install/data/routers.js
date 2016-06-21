@@ -11,12 +11,12 @@ function createDocument(option) {
     common.mix(o, option)
     return o;
 }
-
 module.exports = {
     installer: 'api',
     data: [
         createDocument({
-            uri: 'menu'
+            uri: 'menu',
+            module: 'catagory'
         }),
         createDocument({
             uri: 'dynamiccollection'

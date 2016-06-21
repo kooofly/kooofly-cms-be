@@ -6,12 +6,11 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 //var session = require('express-session');
 var bodyParser = require('body-parser');
-var resetful = require('./resetful/index')
 //var routes = require('./system/_router')
 var  common = require('./system/common')
-var _router = require('./system/routers')
 var installRouters = require('./install/routers')
-
+// TODO 可能的性能优化 已优化 api更新问题
+require('events').EventEmitter.prototype._maxListeners = 4
 var app = express();
 
 var install = require('./install/index')
@@ -37,10 +36,12 @@ app.use(function(req, res, next) {
 })
 
 app.use(installRouters)
+var router = require('./router')
+app.use(router)
 
-if(common.isAdmin()) {
+/*if(common.isAdmin()) {
     _router(app, {}, 'resetful')
-}
+}*/
 
 
 //app.use(routes)

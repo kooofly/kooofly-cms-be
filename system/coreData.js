@@ -102,7 +102,8 @@ var data = [
                 attribute: { type: 'String', required: true },
                 control: {
                     name: 'text',
-                    label: 'API uri'
+                    label: 'API uri',
+                    placeholder: 'uri的每个单词都需要以字母开头'
                 }
             },
             {
@@ -139,14 +140,14 @@ var data = [
                 attribute: { type: 'String' },
                 control: {
                     name: 'text',
-                    placeholder: '如填写module，则会new API(module)',
+                    placeholder: '如填写module，则会new API(module), 默认 new API(uri)',
                     label: '模块'
                 }
             },
             // coreDispatch.isNot404 中用来混合req使用
             {
                 name: 'config',
-                attribute: { type: { 'Object' } },
+                attribute: { type: 'Object' },
                 control: {
                     name: 'textarea',
                     placeholder: '服务器端默认参数配置 可配置的参数有 processor、body、query、params',

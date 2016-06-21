@@ -1,6 +1,9 @@
 var Class = require('./Class')
 var promiseModels = require('./promiseModels')
 var promiseApis = require('../resetful/promiseApis')
+var customApis = require('../resetful/customApis')
+var API = require('../resetful/ApiCreater')
+var common = require('./common')
 var config = require('./config')
 var msgs = config[config.lang]
 var CoreDispatch = Class.extend({
@@ -10,12 +13,12 @@ var CoreDispatch = Class.extend({
     searchPath: function (apis, pathKeys) {
         var path
         var waitingForSearch
-        if (!pathKeys.length) return null
+        if (!pathKeys.length) return apis
         path = pathKeys[0]
         waitingForSearch = apis[path]
         if (waitingForSearch) {
             pathKeys.shift()
-            return getCallByPath(waitingForSearch, pathKeys)
+            return this.searchPath(waitingForSearch, pathKeys)
         } else {
             return null
         }
@@ -26,6 +29,7 @@ var CoreDispatch = Class.extend({
         })
     },
     isNot404: function (req, res) {
+        var self = this
         var url = req.url
         var mapMethod = {
             GET: 'read',
@@ -38,27 +42,42 @@ var CoreDispatch = Class.extend({
             var result = []
             var array = url.split('?')[0].split('/')
             array.forEach(function (v, i) {
-                if(v !== '') {
+                if(v !== '' && v !== 'resetful') {
                     result.push(v)
                 }
             })
             return result
         })()
-        return promiseApis.then(function (apis) {
-            return new Promise(function (resolve, reject) {
-                var inst = apis[pathKeys[0]]
-                var o = this.searchPath(apis, pathKeys.concat([]))
-                // 支持 /collection/method，如果链接中包含有method 也可能会忽略req.method
-                var fn = o && (typeof o === 'function' ? o : o[method])
-                if (typeof fn === 'function') {
-                    resolve(fn, inst)
-                } else {
-                    // TODO msgs
-                    var err = new Error('Not Found')
-                    err.status = 404
-                    reject(err)
-                }
-            }) 
+        if(!global.apis) {
+            return promiseApis.then(function (apis) {
+                return self.handler(apis, pathKeys, method)
+            }, function (err) {
+                console.log('coreDispatch isNot404', err)
+            })
+        } else {
+            return common.promiseApis(promiseModels, function(apis) {
+                return self.handler(apis, pathKeys, method)
+            }, API, customApis)
+        }
+    },
+    handler: function (apis, pathKeys, method) {
+        var self = this
+        return new Promise(function (resolve, reject) {
+            var inst = apis[pathKeys[0]]
+            var o = self.searchPath(apis, pathKeys.concat([]))
+            // 支持 /collection/method，如果链接中包含有method 也可能会忽略req.method
+            var fnName = o && (typeof o === 'function' ? pathKeys.pop() : method)
+            if (typeof inst[fnName] === 'function') {
+                resolve({
+                    inst: inst,
+                    fnName: fnName
+                })
+            } else {
+                // TODO msgs
+                var err = new Error('Not Found')
+                err.status = 404
+                reject(err)
+            }
         })
     },
     // TODO
@@ -83,7 +102,8 @@ var CoreDispatch = Class.extend({
     isRequestLegal: function (req, params) {
         var self = this
         return new Promise(function (resolve, reject) {
-            resolve(self.mixReq(req, params))
+            self.mixReq(req, params)
+            resolve(req)
         })
     },
     // TODO
@@ -101,9 +121,11 @@ var CoreDispatch = Class.extend({
         }, 3000)
     },
     // 处理数据
-    cookingData: function (result, params) {
-        if(params.single && result.length) {
+    cookingData: function (result, processor) {
+        if(processor && processor.single && result.length) {
             return result[0]
+        } else {
+            return result
         }
     },
     // 字段过滤 查询的时候需要
