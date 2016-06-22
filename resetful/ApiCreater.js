@@ -15,12 +15,12 @@ var API = Class.extend({
     },
     ctor: function(modelName, params, options) {
         // this._initFn(options.fns)
-        // this.__v = options.__v
+        this.__v = options && options.__v
         this.modelName = modelName
         this.model = this._promiseModels.then(function(models) {
             return models[modelName]
         })
-        this.params = params || {}
+        this._paramsInit(params)
         // TODO DEBUG 数据
         var self = this
         var array = ['read', 'create', 'update', 'delete']
@@ -29,6 +29,25 @@ var API = Class.extend({
             tips += v + ':' + (typeof self[v]) + ' | '
         })
         console.log('ApiCreater', tips)
+    },
+    // 构建服务器端配置参数
+    _paramsInit: function (params) {
+        // processor、body、query、params 这些是公共配置 分发这些公共配置到相应的操作中
+        var p = this.params = {
+            GET: {},
+            POST: {},
+            PUT: {},
+            DELETE: {}
+        }
+        if (params) {
+            params.get && (p.GET = params.get)
+            params.post && (p.POST = params.get)
+            params.put && (p.PUT = params.get)
+            params.delete && (p.DELETE = params.get)
+            for (var k in p) {
+                params.all && common.mix(p[k], params.all)
+            }
+        }
     },
     // 权限 api控制相关 设置方法集
     _initFn: function (fns) {
@@ -163,7 +182,7 @@ var API = Class.extend({
      * 如果以后出现3的情况，则处理成：没有_masterId 则自动默认_masterId，这样做到兼容
      * 3.（可能不存在这个场景,先不考虑）知道slaveId 插入master，返回的masterId 插入映射表
      * */
-    _createMasterSlaveMap: function (data, waitingMap, slave) {
+    _createOnetoMany: function (data, waitingMap, slave) {
         var self = this
         var slaveData = data[slave]
         return common.promiseParsingMap(waitingMap, this._promiseModels).then(function (map) {
@@ -193,9 +212,10 @@ var API = Class.extend({
             })
         })
     },
-    _createSlaveMap: function (data, waitingMap) {
+    _createOnetoOne: function (data, waitingMap) {
         var self = this
         return common.promiseParsingMap(waitingMap, this._promiseModels).then(function (map) {
+            // 重复数据验证
             return this._duplicateCheck(data).then(function() {
                 // 插入 slave 数据
                 var d = common.filterKey(data, map.masterId)
@@ -211,16 +231,20 @@ var API = Class.extend({
         })
     },
     create: function (req) {
+        this._mixServerConfig('POST', req)
         var data = req.body
         var slave = req.query._slave
         var waitingMap = req.query._map
         if (waitingMap) {
+            // TODO 统一规则 OnetoOne OnetoMany createAndcreateSlave
             if (slave) {
-                return this._createMasterSlaveMap(data, waitingMap, slave).then(function (result) {
+                // 一对多
+                return this._createOnetoMany(data, waitingMap, slave).then(function (result) {
                     return this._processor(result)
                 })
             } else {
-                return this._createSlaveMap(data, waitingMap).then(function (result) {
+                // 一对一
+                return this._createOnetoOne(data, waitingMap).then(function (result) {
                     return this._processor(result)
                 })
             }
@@ -232,18 +256,124 @@ var API = Class.extend({
             })
         }
     },
-    delete: function (req) {},
-    _updateOnetoOne: function (conditions, data, map) {
+    // 删除slave 删除map
+    _deleteOnetoOne: function (query, waitingMap) {
+        var self = this
+        return common.promiseApis(waitingMap, this._promiseModels).then(function (map) {
+            var conditions = common.filterReserved(query)
+            var keys = self.masterOrSlave(map)
+            return self._delete(conditions).then(function (deleteResult) {
+                console.log(deleteResult)
+                var mapCondition = {}
+                mapCondition[map[keys.meId]] = conditions._id
+                mapCondition[map.contactField] = map.slave
+                return self._delete(mapCondition)
+            })
+        })
+    },
+    _deleteOnetoMany: function (query, waitingMap) {
 
     },
-    _updateOnetoMany: function (conditions, data, map) {
+    // 考虑删除master数据同时删除slave数据的情况
+    _deleteAndDelSlave: function (query, waitingMap) {
 
+    },
+    delete: function (req) {
+        this._mixServerConfig('DELETE', req)
+        var query = req.query
+        var map = query._map
+        var pattern = query._pattern
+        if (map) {
+            if (!pattern || pattern === 'onetoone') {
+                return this._deleteOnetoOne(query, map).then(function (result) {
+                    return this._processor(result)
+                })
+            } else if (pattern === 'onetomany') {
+                return this._deleteOnetoMany(query, map).then(function (result) {
+                    return this._processor(result)
+                })
+            } else if (pattern === 'deleteslave') {
+                return this._deleteAndDelSlave(query, map).then(function (result) {
+
+                })
+            }
+        } else {
+            return this._delete(query).then(function (result) {
+                return this._processor(result)
+            })
+        }
+    },
+    // 判断当前的主要操作model是master还是slave
+    masterOrSlave: function (map) {
+        return this.modelName === map.master ? {
+            me: 'master',
+            meId: 'masterId',
+            he: 'slave',
+            heId: 'slaveId'
+        } : {
+            me: 'slave',
+            meId: 'slaveId',
+            he: 'master',
+            heId: 'masterId'
+        }
+    },
+    // 1.更新slave 2.更新map 现在暂时只支持这中情况 要支持多种情况 见 _updateOnetoMany masterOrSlave的用法
+    _updateOnetoOne: function (conditions, data, waitingMap) {
+        var self = this
+        return common.promiseParsingMap(waitingMap, this._promiseModels).then(function (map) {
+            var slaveData = common.filterKey(data, map.masterId)
+            return self._update({ _id: slaveData._id }, slaveData).then(function () {
+                var mapCondition = {}
+                mapCondition[map.slaveId] = slaveData._id
+                mapCondition[map.contactField] = map.slave
+                var doc = {}
+                doc[map.masterId] = data[map.masterId]
+                doc[map.slaveId] = slaveData._id
+                doc[map.contactField] = map.slave
+                return self._update(mapCondition, doc, map.mapCollectionName)
+            })
+        })
+    },
+    // 只更新当前model和map 遇到需要真实删除关联数据的 就在页面中设计真实删除操作，简化通用设计的复杂度，如果确实需要删除关联数据的情况，则定制api也可以
+    // 1.更新master 2.更新map（只添加新数据）
+    /*
+    * 添加时，使用添加 这里不考虑，更新时，场景：
+    * 1.collection api
+    *   删除一条api 由前端控件group-api提供删除接口，真实删除
+    *   修改一条api 由前端控件group-api提供修改接口，真实修改
+    *   添加一条api 由这个方法添加，所以这里只需要添加新数据就可以
+    * 2. catagory link 多对多
+    *   删除一条catagory 由前端控件【多选catagory-tree】提供删除接口，删除映射
+    *   前端控件不提供修改catagory功能 控件类似 多选的 select2 选中时，生成一个带×的标签，所以没有修改功能
+    *   添加一条catagory 由这个方法添加，所以这里只需要添加新数据就可以
+    * */
+    //
+    _updateOnetoMany: function (conditions, data, waitingMap) {
+        var self = this
+        return common.promiseParsingMap(waitingMap, this._promiseModels).then(function (map) {
+            var keys = self.masterOrSlave(map)
+            var needFilter = map[keys.he] // 需要过滤的字段 不属于本model的字段，另一个表的字段
+            var data = common.filterKey(data, needFilter)
+            return this._update({_id: data._id}, data).then(function () {
+                var doc = (function() {
+                    var r = []
+                    data[needFilter].forEach(function (v, i) {
+                        if (!v._id) {
+                            r.push(v)
+                        }
+                    })
+                    return r
+                })()
+                return this._create(doc, map.mapCollectionName)
+            })
+        })
     },
     update: function (req) {
+        this._mixServerConfig('PUT', req)
         var query = req.query
         var data = req.body
-        var map = query._map // 是否使用联表查询
-        var pattern = query._pattern // 查询模式 一对一 || 一对多
+        var map = query._map // 是否使用联表更新
+        var pattern = query._pattern // 更新模式 一对一 || 一对多
         if (map) {
             if (!pattern || pattern === 'onetoone') {
                 return this._updateOnetoOne(query, data, map).then(function (result) {
@@ -260,9 +390,26 @@ var API = Class.extend({
             })
         }
     },
+    // 添加更新和删除数据的时候用服务器端参数覆盖客户端参数，保证数据操作的正确性，查询的时候 用客户端参数 覆盖 服务器端参数，保证查询的灵活性
+    // 更新有时候可能也需要灵活性 因为有时候只更新某些字段 比如只更新排序
+    _mixServerConfig: function(type, req, isClientCoverServer) {
+        var p = this.params[type]
+        switch (type) {
+            case 'GET':
+                p.query && (req.query = common.mix({}, p.query, req.query))
+                break;
+            default:
+                p.query && common.mix(req.query, p.query)
+                p.body && common.mix(req.body, p.body)
+                p.params && common.mix(req.params, p.params)
+                ;
+        }
+    },
+    //
     _readParams: function (query, projectionIndex) {
+        var conditions = common.filterReserved(query)
         return {
-            conditions: common.filterReserved(query),
+            conditions: conditions,
             projection: this._projectionTransition(query._projection, projectionIndex || 0),
             options: this._optionsFielter(query)
         }
@@ -353,6 +500,7 @@ var API = Class.extend({
         return this._read(params)
     },
     read: function (req) {
+        this._mixServerConfig('GET', req)
         var self = this
         var query = req.query
         var map = query._map // 是否使用联表查询
@@ -363,12 +511,10 @@ var API = Class.extend({
         if (this.params.processor && common.isUndefined(this.params.processor.single) && common.isDefined(single)) {
             this.params.processor.single = single
         } else {
-            if (common.isDefined(single)) {
-                if (!this.params.processor) {
-                    this.params.processor = {}
-                }
-                this.params.processor['single'] = single
+            if (!this.params.processor) {
+                this.params.processor = {}
             }
+            this.params.processor['single'] = single
         }
         if (map) {
             if (!pattern || pattern === 'onetoone') {

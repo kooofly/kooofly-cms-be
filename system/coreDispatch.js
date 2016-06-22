@@ -49,11 +49,10 @@ var CoreDispatch = Class.extend({
             return result
         })()
         if(!global.apis) {
-            return promiseApis.then(function (apis) {
+            global.apis = {}
+            return common.promiseApis(promiseModels, function(apis) {
                 return self.handler(apis, pathKeys, method)
-            }, function (err) {
-                console.log('coreDispatch isNot404', err)
-            })
+            }, API, customApis)
         } else {
             return common.promiseApis(promiseModels, function(apis) {
                 return self.handler(apis, pathKeys, method)

@@ -144,13 +144,13 @@ var data = [
                     label: '模块'
                 }
             },
-            // coreDispatch.isNot404 中用来混合req使用
+            // coreDispatch.isNot404 中用来混合req使用  params 暂时没用 查询的时候只可以配置query 和 processor
             {
                 name: 'config',
                 attribute: { type: 'Object' },
                 control: {
                     name: 'textarea',
-                    placeholder: '服务器端默认参数配置 可配置的参数有 processor、body、query、params',
+                    placeholder: '服务器端默认参数配置 可配置的一级参数有 all、get、post、put、delete,二级参数有 processor、body、query、params，例如：{ "all": { "query": { "_map": "catagory_link" } }, "get": { "query": { "_single": 1 } } }',
                     label: '配置'
                 }
             },

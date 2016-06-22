@@ -62,7 +62,7 @@ module.exports = {
         }
         return result;
     },
-    // 过滤保留字 _limit _sort _sortby _map _single
+    // 过滤保留字 _limit _sort _sortby _map _single _pattern _projection _version等
     filterReserved: function (o) {
         var result = {}
         for (var k in o) {
@@ -72,12 +72,13 @@ module.exports = {
         }
         return result
     },
-    // 解析_map
+    // 解析_map 不能进行 master slave 倒转，由api自己解析
+    // master
     promiseParsingMap: function (map, promiseModels) {
         var mapSplit = map.split('_')
         var master = mapSplit[0]
-        var slave = mapSplit[2] ? mapSplit[2] : mapSplit[1]
-        var dbKey = mapSplit[1]
+        var slave = mapSplit[1]
+        var dbKey = mapSplit[2] || mapSplit[1]
         return promiseModels.then(function (models) {
             var result = {
                 master: master,
@@ -86,12 +87,9 @@ module.exports = {
                 slaveId: dbKey + 'Id',
                 contactField: 'contentType'
             }
-            var possibleColl = 'map' + master + dbKey
-            var possibleCollReverse = 'map' + dbKey + master
-            if(models[possibleColl]) {
-                result['mapCollectionName'] = possibleColl
-            } else if (models[possibleCollReverse]) {
-                result['mapCollectionName'] = possibleCollReverse
+            var coll = 'map' + master + dbKey
+            if (models[coll]) {
+                result['mapCollectionName'] = coll
             } else {
                 console.log('promiseParsingMap error', map)
             }
@@ -121,7 +119,9 @@ module.exports = {
                     var apiName = v.uri
                     var apiModule = v.module || v.uri
                     // 修改 API 时 更新 API 这里可能会导致 _maxListeners 问题 TODO 删除 API 时 更新 api
-                    if(!global.apis[apiName] || (v.__v !== global.apis[apiName].__v)) {
+                    var apiVersion = global.apis[apiName] && global.apis[apiName].__v
+                    var thisVersion = v.__v
+                    if(!global.apis[apiName] || (apiVersion !== thisVersion)) {
                         var MayBeAPI = customApis[apiName]
                         if(MayBeAPI) {
                             global.apis[apiName] = new MayBeAPI(apiModule, v.config, { fns: v.method, __v: v.__v })

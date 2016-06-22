@@ -1,22 +1,46 @@
 特殊查询字段：
 params:
 _single=1 表示返回单个数据
-_limit=10&page=3 表示返回翻页数据
+_limit=10&_page=3 表示返回翻页数据
 _map=role_catagory 表示关联查询
 _sort=asc||desc&[_sortby=sort] 表示插入排序 sortby是可选参数 默认_sortby=sort 可以填写_id等，多个之间用“,”分割 如： _sort=asc,desc&_sortby=lastModifyTime,sort
-_insert=apis 关系插入时使用 见DbClass _createAssociated()
-关联查询 _projection=xyz,uyu _pattern=onetoone ||onetomany 默认 onetoone
+_slave=apis 关系插入时使用
+
+_pattern= onetoone || onetomany || deleteslave  默认 onetoone 关联操作 deleteslave 删除时候使用 |  TODO createslave
+_projection=xyz,uyu 查询字段过滤
+_version=1 是否版本控制 当更新数据时  数据的版本不一致 则 停止更新 返回更新错误 TODO
+中间映射表添加 通用配置设计
+映射表的添加，字段命名有限制，详见common.js 中的 promiseParsingMap()
+
 
 排序
-分页
-改变路由机制
 
 统一数据格式：
-多数据
+多数据 组合
 {
     result: '',
-    type: 'info || confirm || data || error || other'
+    type: 'info || data || error || other'
 }
+可能的例子：
+
+    {
+        result: {
+            title: '错误标题',
+            content: '错误主体信息'
+        },
+        type: 'error'
+    }
+
+    {
+        result: {
+            main: [{},...],
+            total: 45,
+            other: 'xxx'
+        },
+        type: 'data'
+    }
+
+    other 情况不采用通用处理，需要自己处理正确和错误的情况
 单数据 直接输出
 可能的例子：
 
@@ -38,8 +62,7 @@ admin 设计
 
 
 
-中间映射表添加 通用配置设计
-映射表的添加，所有的字段都有限制，详见DbClass 中的 _readAssociated()
+
 
 
 通用映射设计：

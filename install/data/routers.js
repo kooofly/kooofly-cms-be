@@ -16,7 +16,14 @@ module.exports = {
     data: [
         createDocument({
             uri: 'menu',
-            module: 'catagory'
+            module: 'catagory',
+            config: {
+                "all": {
+                    "query": {
+                        "type": "menu"
+                    }
+                }
+            }
         }),
         createDocument({
             uri: 'dynamiccollection'
@@ -31,7 +38,14 @@ module.exports = {
             uri: 'role'
         }),
         createDocument({
-            uri: 'catagory'
+            uri: 'catagory',
+            config: {
+                "all": {
+                    "query": {
+                        "type": null
+                    }
+                }
+            }
         }),
         createDocument({
             uri: 'link'

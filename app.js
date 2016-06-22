@@ -34,7 +34,15 @@ app.use(function(req, res, next) {
     res.set('Access-Control-Allow-Headers', "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
     next()
 })
-
+app.use(function(req, res, next) {
+    if (req.method === 'OPTIONS') {
+        res.json({
+            status: 200
+        })
+    } else {
+        next()
+    }
+});
 app.use(installRouters)
 var router = require('./router')
 app.use(router)
