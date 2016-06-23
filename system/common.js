@@ -77,7 +77,7 @@ module.exports = {
     promiseParsingMap: function (map, promiseModels) {
         var mapSplit = map.split('_')
         var master = mapSplit[0]
-        var slave = mapSplit[1]
+        var slave = mapSplit[1] === 'all' ? null : mapSplit[1]
         var dbKey = mapSplit[2] || mapSplit[1]
         return promiseModels.then(function (models) {
             var result = {
@@ -98,7 +98,7 @@ module.exports = {
     },
     upperFirstLetter: function (str) {
         return str.replace(/\b\w+\b/g, function(word) {
-            return word.substring(0,1).toUpperCase( ) +  word.substring(1)
+            return word.substring(0, 1).toUpperCase() +  word.substring(1)
         })
     },
     // 过滤不需要的key
@@ -135,5 +135,11 @@ module.exports = {
                 console.log('promiseApis', err)
             })
         })
+    },
+    reject404: function (reject) {
+        // TODO msgs
+        var err = new Error('Not Found')
+        err.status = 404
+        reject(err)
     }
 }

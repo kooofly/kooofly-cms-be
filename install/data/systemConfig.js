@@ -11,10 +11,12 @@ module.exports = {
                     "default": {
                         "widgets": [
                             {
-                                "widget": "button-create"
+                                "widget": "button-create",
+                                "params": {}
                             },
                             {
-                                "widget": "button-batch_delete"
+                                "widget": "button-batch_delete",
+                                "params": {}
                             }
                         ]
                     },

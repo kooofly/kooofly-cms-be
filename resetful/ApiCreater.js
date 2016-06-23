@@ -117,10 +117,10 @@ var API = Class.extend({
     _optionsFielter: function (query) {
         var result = {}
         if (query._limit && query._page) {
-            var limit = parseInt(_limit, 10)
-            var skip = (page - 1) * limit
-            result[limit] = limit
-            result[skip] = skip
+            var limit = parseInt(query._limit, 10)
+            var skip = (query._page - 1) * limit
+            result['limit'] = limit
+            result['skip'] = skip
         }
         return result
     },
@@ -175,6 +175,7 @@ var API = Class.extend({
         })
     },
     /*
+     * TODO 所有的增删改查都会出现操作失败（非代码bug引起的操作失败，比如：数据库服务器挂了），过程中要记录操作数据和状态。方便恢复正常后 继续执行未完成的操作
      * 1.【插master & slave】同时插入两个 返回的数据插入映射表 post /collection?_map=dyncoll_api&_insert=apis
      * 2.【插slave】知道masterId 插入slave 返回的slaveId 插入映射表 post /article?_map=cat_art&_masterId=catagoryId。
      * 如果3不存在 就不需要_masterId=catagoryId
@@ -232,6 +233,7 @@ var API = Class.extend({
     },
     create: function (req) {
         this._mixServerConfig('POST', req)
+        var self = this
         var data = req.body
         var slave = req.query._slave
         var waitingMap = req.query._map
@@ -240,24 +242,24 @@ var API = Class.extend({
             if (slave) {
                 // 一对多
                 return this._createOnetoMany(data, waitingMap, slave).then(function (result) {
-                    return this._processor(result)
+                    return self._processor(result)
                 })
             } else {
                 // 一对一
                 return this._createOnetoOne(data, waitingMap).then(function (result) {
-                    return this._processor(result)
+                    return self._processor(result)
                 })
             }
         } else {
-            return this._duplicateCheck(data).then(function() {
-                return this._create(data).then(function(result) {
-                    return this._processor(result)
+            return this._duplicateCheck(data).then(function () {
+                return self._create(data).then(function(result) {
+                    return self._processor(result)
                 })
             })
         }
     },
-    // 删除slave 删除map
-    _deleteOnetoOne: function (query, waitingMap) {
+    // 删除数据 删除map
+    _deleteAndDelMap: function (query, waitingMap) {
         var self = this
         return common.promiseApis(waitingMap, this._promiseModels).then(function (map) {
             var conditions = common.filterReserved(query)
@@ -266,40 +268,85 @@ var API = Class.extend({
                 console.log(deleteResult)
                 var mapCondition = {}
                 mapCondition[map[keys.meId]] = conditions._id
-                mapCondition[map.contactField] = map.slave
+                // !map.slave 表示删除所有的slave
+                if (map.slave) {
+                    mapCondition[map.contactField] = map.slave
+                }
                 return self._delete(mapCondition)
             })
         })
     },
-    _deleteOnetoMany: function (query, waitingMap) {
-
-    },
     // 考虑删除master数据同时删除slave数据的情况
     _deleteAndDelSlave: function (query, waitingMap) {
+        var self = this
+        return common.promiseApis(waitingMap, this._promiseModels).then(function (map) {
+            var conditions = common.filterReserved(query)
+            var keys = self.masterOrSlave(map)
+            return self._delete(conditions).then(function (deleteResult) {
+                console.log(deleteResult)
+                var mapCondition = {}
+                mapCondition[map[keys.meId]] = conditions._id
+                // !map.slave 表示删除所有的slave
+                if (map.slave) {
+                    mapCondition[map.contactField] = map.slave
+                }
+                return self._read({
+                    conditions: conditions
+                }, map.mapCollectionName).then(function (mapResult) {
+                    if (map.slave) {
+                        var waitingDel = []
+                        mapResult.forEach(function (v, i) {
+                            var o = {}
+                            o['_id'] = v[map[keys.heId]]
+                            waitingDel.push(o)
+                        })
+                        return self._delete(waitingDel)
+                    } else {
+                        var promises = []
+                        // 一个master 可能对应有不同model的数据  比如 catagory 对应 link article 等内容模型，所以要分组删除
+                        var group = {}
+                        mapResult.forEach(function (v, i) {
+                            var waitingModel = group[v[map.contactField]]
+                            var o = {}
+                            o['_id'] = v[map[keys.heId]]
+                            if (!waitingModel) {
+                                group[v[map.contactField]] = []
+                            }
+                            group[v[map.contactField]].push(o)
+                        })
+                        for (var key in group) {
+                            promises.push(self._delete(group[key], key))
+                        }
+                        return Promise.all(promises)
+                    }
 
+                })
+            })
+        })
     },
     delete: function (req) {
         this._mixServerConfig('DELETE', req)
+        var self = this
         var query = req.query
+        // map 可能是  catagory_all_content 这个表示删除不同model的所有映射 这个只能用于 删除 master 然后删除 map
+        // map = catagory_link_content || coll_api 表示删除对应model的数据 这个可以用于删除master 然后删除 map 也可以用于删除 slave 然后删除 map
         var map = query._map
+        // 这里的pattern只有deleteslave可选
         var pattern = query._pattern
         if (map) {
-            if (!pattern || pattern === 'onetoone') {
-                return this._deleteOnetoOne(query, map).then(function (result) {
-                    return this._processor(result)
-                })
-            } else if (pattern === 'onetomany') {
-                return this._deleteOnetoMany(query, map).then(function (result) {
-                    return this._processor(result)
-                })
-            } else if (pattern === 'deleteslave') {
+            //
+            if (pattern === 'deleteslave') {
                 return this._deleteAndDelSlave(query, map).then(function (result) {
-
+                    return self._processor(result)
+                })
+            } else {
+                return this._deleteAndDelMap(query, map).then(function (result) {
+                    return self._processor(result)
                 })
             }
         } else {
             return this._delete(query).then(function (result) {
-                return this._processor(result)
+                return self._processor(result)
             })
         }
     },
@@ -370,6 +417,7 @@ var API = Class.extend({
     },
     update: function (req) {
         this._mixServerConfig('PUT', req)
+        var self = this
         var query = req.query
         var data = req.body
         var map = query._map // 是否使用联表更新
@@ -377,16 +425,16 @@ var API = Class.extend({
         if (map) {
             if (!pattern || pattern === 'onetoone') {
                 return this._updateOnetoOne(query, data, map).then(function (result) {
-                    return this._processor(result)
+                    return self._processor(result)
                 })
             } else if (pattern === 'onetomany') {
                 return this._updateOnetoMany(query, data, map).then(function (result) {
-                    return this._processor(result)
+                    return self._processor(result)
                 })
             }
         } else {
             return this._update(query, data).then(function (result) {
-                return this._processor(result)
+                return self._processor(result)
             })
         }
     },

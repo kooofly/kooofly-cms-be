@@ -12,10 +12,10 @@ var routeId = objectid()
 var wedigetId = objectid()
 var areaId = objectid()
 var configId = objectid()
+var menuId = objectid()
 
 function createDocument(option) {
     var o = {
-        type: 'menu',
         isEnable: true
     }
     common.mix(o, option)
@@ -59,13 +59,15 @@ module.exports = {
             parentId: systemId,
             _id: collectionId,
             name: 'Collection管理',
-            alias: 'dynamiccollection'
+            alias: 'dynamiccollection',
+            link: '/#!/admin/system/dynamiccollection'
         }),
         createDocument({
             parentId: systemId,
             _id: apiId,
             name: 'API管理',
-            alias: 'api'
+            alias: 'api',
+            link: '/#!/admin/system/api'
         }),
         /* TODO 可能不需要 等需要的时候再 开启
         createDocument({
@@ -78,19 +80,29 @@ module.exports = {
             parentId: systemId,
             _id: wedigetId,
             name: 'Widget管理',
-            alias: 'widget'
+            alias: 'widget',
+            link: '/#!/admin/system/widget'
         }),
         createDocument({
             parentId: systemId,
             _id: areaId,
             name: 'Area管理',
-            alias: 'area'
+            alias: 'area',
+            link: '/#!/admin/system/area'
         }),
         createDocument({
             parentId: systemId,
             _id: configId,
             name: '系统配置',
-            alias: 'systemconfig'
+            alias: 'systemconfig',
+            link: '/#!/admin/system/systemconfig'
+        }),
+        createDocument({
+            parentId: systemId,
+            _id: menuId,
+            name: '菜单管理',
+            alias: 'menu',
+            link: '/#!/admin/system/menu'
         })
     ]
 }

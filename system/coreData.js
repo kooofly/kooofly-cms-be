@@ -63,13 +63,6 @@ var data = [
                 },
             },
             {
-                name: 'apis',
-                isExternal: true,
-                control: {
-                    name: 'group-apis'
-                }
-            },
-            {
                 name: 'fields',
                 attribute: { type: 'Array' },
                 control: {
@@ -238,6 +231,57 @@ var data = [
         ]
     }),
     createDocument({
+        _id: ids.MODEL_Menu_ID,
+        name: '菜单表',
+        collectionName: 'menu',
+        fields: [
+            {
+                name: 'parentId',
+                attribute: { type: 'ObjectId' },
+                control: {
+                    name: 'select',
+                    data: '@menu', //@表示调用catagory查询api
+                    label: '父菜单'
+                },
+            },
+            {
+                name: 'name',
+                attribute: { type: 'String', required: true },
+                control: {
+                    name: 'text',
+                    label: '菜单名称'
+                }
+            },
+            {
+                name: 'alias',
+                attribute: { type: 'String' },
+                control: {
+                    name: 'text',
+                    label: '菜单别名'
+                }
+            },
+            {
+                name: 'link',
+                attribute: { type: 'String' },
+                control: {
+                    name: 'text',
+                    label: '菜单链接'
+                }
+            },
+            {
+                name: 'logo',
+                attribute: { type: 'String' },
+                control: {
+                    name: 'upload',
+                    label: '菜单Logo'
+                }
+            },
+            isEnable,
+            sort,
+            lastModifyTime,
+        ]
+    }),
+    createDocument({
         _id: ids.MODEL_Catagory_ID,
         name: '分类表',
         collectionName: 'catagory',
@@ -285,7 +329,7 @@ var data = [
             },
             {
                 name: 'type',
-                attribute: { type: 'String' }, //栏目类型，可能废弃，因为智能添加模型（template 添加模型）更灵活  page || null || menu
+                attribute: { type: 'String' }, // 栏目类型，可能废弃，因为智能添加模型（template 添加模型）更灵活  page || null || menu
             },
             {
                 name: 'code',
@@ -358,7 +402,7 @@ var data = [
                 }
             },
             isEnable,
-            /*{ // 忘记是干嘛用的了
+            /*{ // 忘记是干嘛用的了 可能是权限相关的
                 name: 'status',
                 attribute: { type: 'String', required: true },
                 control: {

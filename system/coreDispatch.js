@@ -63,20 +63,22 @@ var CoreDispatch = Class.extend({
         var self = this
         return new Promise(function (resolve, reject) {
             var inst = apis[pathKeys[0]]
-            var o = self.searchPath(apis, pathKeys.concat([]))
-            // 支持 /collection/method，如果链接中包含有method 也可能会忽略req.method
-            var fnName = o && (typeof o === 'function' ? pathKeys.pop() : method)
-            if (typeof inst[fnName] === 'function') {
-                resolve({
-                    inst: inst,
-                    fnName: fnName
-                })
+            if (inst) {
+                var o = self.searchPath(apis, pathKeys.concat([]))
+                // 支持 /collection/method，如果链接中包含有method 也可能会忽略req.method
+                var fnName = o && (typeof o === 'function' ? pathKeys.pop() : method)
+                if (typeof inst[fnName] === 'function') {
+                    resolve({
+                        inst: inst,
+                        fnName: fnName
+                    })
+                } else {
+                    common.reject404(reject)
+                }
             } else {
-                // TODO msgs
-                var err = new Error('Not Found')
-                err.status = 404
-                reject(err)
+                common.reject404(reject)
             }
+
         })
     },
     // TODO

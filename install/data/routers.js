@@ -15,15 +15,7 @@ module.exports = {
     installer: 'api',
     data: [
         createDocument({
-            uri: 'menu',
-            module: 'catagory',
-            config: {
-                "all": {
-                    "query": {
-                        "type": "menu"
-                    }
-                }
-            }
+            uri: 'menu'
         }),
         createDocument({
             uri: 'dynamiccollection'
@@ -38,14 +30,7 @@ module.exports = {
             uri: 'role'
         }),
         createDocument({
-            uri: 'catagory',
-            config: {
-                "all": {
-                    "query": {
-                        "type": null
-                    }
-                }
-            }
+            uri: 'catagory'
         }),
         createDocument({
             uri: 'link'

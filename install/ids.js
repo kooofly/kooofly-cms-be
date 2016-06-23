@@ -7,6 +7,7 @@ module.exports = {
     MODEL_User_ID: objectid(),
     MODEL_Role_ID: objectid(),
     MODEL_Catagory_ID: objectid(),
+    MODEL_Menu_ID: objectid(),
     MODEL_Link_ID: objectid(),
     MODEL_Article_ID: objectid(),
     MODEL_Tag_ID: objectid(),
