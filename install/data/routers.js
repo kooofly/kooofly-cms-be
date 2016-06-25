@@ -33,7 +33,14 @@ module.exports = {
             uri: 'catagory'
         }),
         createDocument({
-            uri: 'link'
+            uri: 'link',
+            config: {
+                "post": {
+                    "query": {
+                        "_map": "catagory_link_content"
+                    }
+                }
+            }
         }),
         createDocument({
             uri: 'article'

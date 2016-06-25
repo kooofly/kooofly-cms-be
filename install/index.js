@@ -2,7 +2,7 @@ var common = require('../system/common')
 var customApis = require('../resetful/installApi')
 var API = require('../resetful/ApiCreater')
 var coreData = require('../system/coreData')
-var promiseApis = require('../resetful/promiseApis')
+//var promiseApis = require('../resetful/promiseApis')
 var promiseModels = require('../system/promiseModels')
 module.exports = function(option) {
     var dataPaths = common.traversalFolder('install/data', './data')
@@ -44,19 +44,19 @@ module.exports = function(option) {
         if (secondStepPackage.length) {
             console.log('fisrt step install:', firstResult)
             // 第二步安装
-            return promiseApis.then(function (secondApis) {
+            global.apis = {}
+            return common.promiseApis(promiseModels, function(secondApis) {
                 var secondStepPromises = []
-                for (var key in secondStepPackage) {
-                    var o = secondStepPackage[key]
-                    var installer = o[key].installer
-                    var data = o[key].data
-                    secondStepPromises.push(secondApis[installer]._install(data, key, option.isRemoveAll))
-                }
+                secondStepPackage.forEach(function (v) {
+                    var installer = v.installer
+                    var data = v.data
+                    secondStepPromises.push(secondApis[installer]._install(data, v.installer, option.isRemoveAll))
+                })
                 return Promise.all(secondStepPromises).then(function (secondResult) {
                     console.log('second step install:', secondResult)
                     return [firstResult, secondResult]
                 })
-            })
+            }, API, customApis)
         } else {
             console.log('all install:', firstResult)
             return [firstResult]

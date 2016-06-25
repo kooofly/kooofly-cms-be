@@ -13,10 +13,11 @@ var wedigetId = objectid()
 var areaId = objectid()
 var configId = objectid()
 var menuId = objectid()
-
+var sort = 1
 function createDocument(option) {
     var o = {
-        isEnable: true
+        isEnable: true,
+        sort: sort ++
     }
     common.mix(o, option)
     return o;
@@ -24,6 +25,7 @@ function createDocument(option) {
 
 module.exports = {
     installer: 'menu',
+    defer: true,
     data: [
         createDocument({
             _id: contentId,

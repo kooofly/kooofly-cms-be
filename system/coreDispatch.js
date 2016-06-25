@@ -108,7 +108,7 @@ var CoreDispatch = Class.extend({
         })
     },
     // TODO
-    //数据版本检测
+    // 数据版本检测
     versionCheck: function () {
         return new Promise(function (resolve, reject) {
             resolve(true)

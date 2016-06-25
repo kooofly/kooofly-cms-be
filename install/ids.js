@@ -21,5 +21,18 @@ module.exports = {
     MODEL_SystemConfig_ID: objectid(),
     MODEL_Log_ID: objectid(),
     MODEL_Page_ID: objectid(),
-    MODEL_MapDynamicCollectionAPI_ID: objectid()
+    MODEL_MapDynamicCollectionAPI_ID: objectid(),
+    mockCatagoryIds: {
+        id0: objectid(),
+        id1: objectid(),
+        id2: objectid(),
+        id3: objectid(),
+        id4: objectid(),
+        id5: objectid(),
+        id6: objectid(),
+        id7: objectid(),
+        id8: objectid(),
+        id9: objectid(),
+        id10: objectid()
+    }
 }

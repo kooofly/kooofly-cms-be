@@ -4,6 +4,7 @@ var promiseModels = require('../system/promiseModels')
 var common = require('../system/common')
 var config = require('../system/config')
 var msgs = config[config.lang]
+var db = require('../system/db')
 
 var API = Class.extend({
     _promiseModels: promiseModels,
@@ -28,7 +29,7 @@ var API = Class.extend({
         array.forEach(function (v, i) {
             tips += v + ':' + (typeof self[v]) + ' | '
         })
-        console.log('ApiCreater', tips)
+        console.log('ApiCreater ctor:', tips)
     },
     // 构建服务器端配置参数
     _paramsInit: function (params) {
@@ -41,9 +42,9 @@ var API = Class.extend({
         }
         if (params) {
             params.get && (p.GET = params.get)
-            params.post && (p.POST = params.get)
-            params.put && (p.PUT = params.get)
-            params.delete && (p.DELETE = params.get)
+            params.post && (p.POST = params.post)
+            params.put && (p.PUT = params.put)
+            params.delete && (p.DELETE = params.delete)
             for (var k in p) {
                 params.all && common.mix(p[k], params.all)
             }
@@ -83,29 +84,35 @@ var API = Class.extend({
         })
     },
     // 重复提交检测
-    _duplicateCheck: function (data, modelName) {
-        var duplicate = this.params.duplicate
-        var model = modelName || this.modelName
-        if (!duplicate || !duplicate[model]) {
+    /*
+    * 简单设计 不考虑联表的情况
+    * 联表的情况 需要一个对象或者是一个解析规则 如{ link: ['name'], catagory: ['_id'] } || ['name','catagoryId']
+    * */
+    _duplicateCheck: function (data) {
+        var duplicate = this.params.POST.duplicate
+        if (!duplicate || !duplicate.length) {
             return new Promise(function (resolve, reject) {
                 resolve(true)
             })
         } else {
             // array
-            var conditions = {}
-            duplicate[model].forEach(function (v, i) {
-                if (common.isDefined(data[v])) {
-                    conditions[v] = data[v]
-                }
+            var conditions = []
+            data.forEach(function (o, i) {
+                duplicate.forEach(function (v) {
+                    conditions[i] = {}
+                    if (common.isDefined(o[v])) {
+                        conditions[i][v] = o[v]
+                    }
+                })
             })
+
             var params = {
-                conditions: conditions,
-                projection: '_id'
+                conditions: conditions
             }
             return this._read(params).then(function(result) {
                 return new Promise(function (resolve, reject) {
                     if (result && result.length) {
-                        reject(result[0])
+                        reject(result)
                     } else {
                         resolve(true)
                     }
@@ -171,7 +178,11 @@ var API = Class.extend({
     _read: function(params, modelName) {
         return this._getModel(modelName).then(function(model) {
             // projection 字段 options 分页排序等条件
-            return model.find(params.conditions, params.projection, params.options)
+            var options = (common.isEmptyObject(params.options) || !params.options) ? { sort: {
+                sort: 1
+            } } : params.options
+            var projection = params.projection ? '-lastModifyTime ' + params.projection : '-lastModifyTime'
+            return model.find(params.conditions, projection, options)
         })
     },
     /*
@@ -187,10 +198,10 @@ var API = Class.extend({
         var self = this
         var slaveData = data[slave]
         return common.promiseParsingMap(waitingMap, this._promiseModels).then(function (map) {
-            var promiseMaster = this._duplicateCheck(data).then(function() {
+            var promiseMaster = self._duplicateCheck(data).then(function() {
                 return self._create(common.filterKey(data, slave), map.master)
             })
-            var promiseSlave = this._duplicateCheck(data, map.slave).then(function() {
+            var promiseSlave = self._duplicateCheck(data, map.slave).then(function() {
                 return self._create(slaveData, map.slave)
             })
             // 插入 master slave 数据
@@ -217,33 +228,39 @@ var API = Class.extend({
         var self = this
         return common.promiseParsingMap(waitingMap, this._promiseModels).then(function (map) {
             // 重复数据验证
-            return this._duplicateCheck(data).then(function() {
+            return self._duplicateCheck(data).then(function() {
                 // 插入 slave 数据
-                var d = common.filterKey(data, map.masterId)
+                var d = common.batchFilterKey(data, map.masterId)
                 return self._create(d).then(function (resultSlave) {
-                    var doc = {}
-                    doc[map.masterId] = data[map.masterId]
-                    doc[map.slaveId] = resultSlave._id
-                    doc[map.contactField] = map.slave
+                    var mapData = []
+                    resultSlave.forEach(function (v, i) {
+                        var doc = {}
+                        doc[map.masterId] = data[i][map.masterId]
+                        doc[map.slaveId] = v._id
+                        doc[map.contactField] = map.slave
+                        mapData.push(doc)
+                    })
                     // 插入关联数据
-                    return self._create(doc, map.mapCollectionName)
+                    return self._create(mapData, map.mapCollectionName)
                 })
             })
         })
     },
+    // 批量的创建
     create: function (req) {
         this._mixServerConfig('POST', req)
         var self = this
-        var data = req.body
+        var body = req.body
         var slave = req.query._slave
         var waitingMap = req.query._map
+        var data = common.isArray(body) ? body : [body]
         if (waitingMap) {
             // TODO 统一规则 OnetoOne OnetoMany createAndcreateSlave
             if (slave) {
                 // 一对多
-                return this._createOnetoMany(data, waitingMap, slave).then(function (result) {
+                /*return this._createOnetoMany(data, waitingMap, slave).then(function (result) {
                     return self._processor(result)
-                })
+                })*/
             } else {
                 // 一对一
                 return this._createOnetoOne(data, waitingMap).then(function (result) {
@@ -265,7 +282,7 @@ var API = Class.extend({
             var conditions = common.filterReserved(query)
             var keys = self.masterOrSlave(map)
             return self._delete(conditions).then(function (deleteResult) {
-                console.log(deleteResult)
+                console.log('ApiCreater _deleteAndDelMap:', deleteResult)
                 var mapCondition = {}
                 mapCondition[map[keys.meId]] = conditions._id
                 // !map.slave 表示删除所有的slave
@@ -440,12 +457,27 @@ var API = Class.extend({
     },
     // 添加更新和删除数据的时候用服务器端参数覆盖客户端参数，保证数据操作的正确性，查询的时候 用客户端参数 覆盖 服务器端参数，保证查询的灵活性
     // 更新有时候可能也需要灵活性 因为有时候只更新某些字段 比如只更新排序
-    _mixServerConfig: function(type, req, isClientCoverServer) {
+    _mixServerConfig: function(type, req) {
         var p = this.params[type]
         switch (type) {
             case 'GET':
                 p.query && (req.query = common.mix({}, p.query, req.query))
                 break;
+            case 'POST':
+                var paramsDuplicate = []
+                var reqDuplicate = []
+                if(p.query && p.query.duplicate) {
+                    paramsDuplicate = p.query.duplicate.split(',')
+                }
+                if(req.query.duplicate) {
+                    reqDuplicate = req.query.duplicate.split(',')
+                }
+                p.query && common.mix(req.query, p.query)
+                p.body && common.mix(req.body, p.body)
+                p.params && common.mix(req.params, p.params)
+                if( (p.query && p.query.duplicate) || req.query.duplicate) {
+                    this.params.POST.duplicate = paramsDuplicate.concat(reqDuplicate)
+                }
             default:
                 p.query && common.mix(req.query, p.query)
                 p.body && common.mix(req.body, p.body)
@@ -465,7 +497,7 @@ var API = Class.extend({
     _readOnetoOne: function (query, waitingMap) {
         var self = this
         return common.promiseParsingMap(waitingMap, this._promiseModels).then(function (map) {
-            var params = this._readParams(query)
+            var params = self._readParams(query)
             return self._read(params).then(function (result) {
                 if (result.length) {
                     var json = common.mix({}, result[0]._doc)
@@ -475,25 +507,29 @@ var API = Class.extend({
                     mapParams.conditions[map.slaveId] = json._id
                     return self._read(mapParams, map.mapCollectionName).then(function (resultMap) {
                         if (resultMap && resultMap.length) {
+                            var projection = self._projectionTransition(query._projection, 1) || '_id'
                             var masterParams = {
                                 conditions: {},
-                                projection: this._projectionTransition(query._projection, 1) || '_id'
+                                projection: projection
                             }
                             masterParams.conditions['_id'] = resultMap[0][map.masterId]
-                            return self._read(masterParams, map.master).then(function (resultMaster) {
-                                var singleMaster
-                                if(resultMaster && resultMaster.length) {
-                                    singleMaster = resultMaster[0]
-                                    for (var key in singleMaster) {
-                                        if (key === '_id') {
-                                            json[map.masterId] = singleMaster[key]
-                                        } else {
-                                            json[map.master + common.upperFirstLetter(key)] = singleMaster[key]
+                            json[map.masterId] = resultMap[0][map.masterId]
+                            if (projection === '_id') {
+                                return json
+                            } else {
+                                return self._read(masterParams, map.master).then(function (resultMaster) {
+                                    var singleMaster
+                                    if(resultMaster && resultMaster.length) {
+                                        singleMaster = resultMaster[0]._doc
+                                        for (var key in singleMaster) {
+                                            if (key !== '_id') {
+                                                json[map.master + common.upperFirstLetter(key)] = singleMaster[key]
+                                            }
                                         }
                                     }
-                                }
-                                return json
-                            })
+                                    return json
+                                })
+                            }
                         } else {
                             console.log('apicreater _readOnetoOne map null')
                             return json
@@ -509,7 +545,7 @@ var API = Class.extend({
     _readOnetoMany: function (query, waitingMap) {
         var self = this
         return common.promiseParsingMap(waitingMap, this._promiseModels).then(function (map) {
-            var params = this._readParams(query)
+            var params = self._readParams(query)
             return self._read(params).then(function (result) {
                 if(result.length) {
                     var json = common.mix({}, result[0]._doc)
@@ -583,12 +619,24 @@ var API = Class.extend({
     _install: function (data, key, isRemoveAll) {
         var self = this
         var installer = function () {
-            return self._create(data).then(function () {
+            return self.create({
+                body: data,
+                query: {},
+                params: {}
+            }).then(function () {
                 return key
             })
         }
-        if (isRemoveAll) {
-            return self._delete({}).then(function () {
+        if (isRemoveAll && !global.isDropAll) {
+            global.isDropAll = true
+            var collections = ['api', 'catagory', 'dynamiccollection', 'mapcatagorycontent', 'mapcatagorydynamiccollection', 'menu', 'roles', 'systemconfig', 'link']
+            var promiseRemove = []
+            collections.forEach(function (v) {
+                promiseRemove.push(db.connections[0].db.dropCollection(v))
+            })
+            return Promise.all(promiseRemove).then(function (result) {
+                return installer()
+            }, function (err) {
                 return installer()
             })
         } else {

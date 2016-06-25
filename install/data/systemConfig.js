@@ -3,6 +3,7 @@ var common = require('../../system/common')
 
 module.exports = {
     installer: 'systemconfig',
+    defer: true,
     data: [
         {
             code: 'area_list_handlers',

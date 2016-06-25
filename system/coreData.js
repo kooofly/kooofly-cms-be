@@ -394,7 +394,7 @@ var data = [
                 }
             },
             {
-                name: '     ',
+                name: 'logo',
                 attribute: { type: 'String' },
                 control: {
                     name: 'upload',

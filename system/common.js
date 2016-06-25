@@ -1,9 +1,21 @@
 //var models = require('../system/models')
 var fs = require('fs')
 var toString = Object.prototype.toString
+var hasOwn = Object.prototype.hasOwnProperty
 module.exports = {
     isObject: function (value) {
         return toString.call( value ) === "[object Object]"
+    },
+    isEmptyObject: function (o) {
+        if (!o || toString.call(o) !== "[object Object]" ||
+            o.nodeType || !o.hasOwnProperty ) {
+            return false
+        }
+
+        for (var p in o) {
+            if (o.hasOwnProperty(p)) return false
+        }
+        return true
     },
     isArray: function (value) { return toString.call(value) === '[object Array]' },
     isEmptyObject: function (value) {
@@ -109,6 +121,15 @@ module.exports = {
                 result[key] = o[key]
             }
         }
+        return result
+    },
+    // 批量过滤不需要的key
+    batchFilterKey: function (array, reomveKey) {
+        var self = this
+        var result = []
+        array.forEach(function (v) {
+            result.push(self.filterKey(v, reomveKey))
+        })
         return result
     },
     promiseApis: function (promiseModels, successCall, API, customApis) {

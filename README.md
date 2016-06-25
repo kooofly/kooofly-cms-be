@@ -13,6 +13,9 @@ _version=1 是否版本控制 当更新数据时  数据的版本不一致 则 �
 映射表的添加，字段命名有限制，详见common.js 中的 promiseParsingMap()
 
 
+TODO
+多条map查询
+批处理
 安装数据完善
 __v 版本控制
 批量操作
