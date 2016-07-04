@@ -34,7 +34,6 @@ module.exports = {
             alias: 'content'
         }),
         createDocument({
-            parentId: contentId,
             _id: catagoryId,
             name: '分类管理',
             alias: 'catagory'
