@@ -542,34 +542,31 @@ var API = Class.extend({
             })
         })
     },
+    // 只接受 类似catagoryId 这样的参数查询  不接受 catagoryName 这样的查询，如果一定需要cataogryName参数 就使用定制的多次查询，先由catagoryName查询出catagoryId 然后 再执行此方法
     _readOnetoMany: function (query, waitingMap) {
         var self = this
         return common.promiseParsingMap(waitingMap, this._promiseModels).then(function (map) {
-            var params = self._readParams(query)
-            return self._read(params).then(function (result) {
-                if(result.length) {
-                    var json = common.mix({}, result[0]._doc)
-                    var mapParams = {
-                        conditions: {}
+            var mapParams = {
+                conditions: {},
+                options: self._optionsFielter(query)
+            }
+            mapParams.conditions[map.masterId] = query[map.masterId]
+            return self._read(mapParams, map.mapCollectionName).then(function (resultMap) {
+                if (resultMap && resultMap.length) {
+                    var params = common.filterReserved(common.filterKey(query, map.masterId))
+                    var slaveParams = {
+                        conditions: { _id: { $in: [] } },
+                        projection: self._projectionTransition(query._projection, 1)
                     }
-                    mapParams.conditions[map.masterId] = json._id
-                    return self._read(mapParams, map.mapCollectionName).then(function (resultMap) {
-                        if (resultMap && resultMap.length) {
-                            var slaveParams = {
-                                conditions: [],
-                                projection: this._projectionTransition(query._projection, 1)
-                            }
-                            resultMap.forEach(function (v, i) {
-                                slaveParams.conditions.push(v['_id'])
-                            })
-                            return self._read(slaveParams, map.slave).then(function (resultSlave) {
-                                if (resultSlave && resultSlave.length) {
-                                    json[map.slave] = resultSlave
-                                }
-                                return json
-                            })
+                    resultMap.forEach(function (v, i) {
+                        slaveParams.conditions._id.$in.push(v[map.slaveId])
+                    })
+                    common.mix(slaveParams.conditions, params)
+                    return self._read(slaveParams, map.slave).then(function (resultSlave) {
+                        if (resultSlave && resultSlave.length) {
+                            return resultSlave
                         } else {
-                            return json
+                            return []
                         }
                     })
                 } else {
