@@ -10,10 +10,11 @@ var collectionId = objectid()
 var apiId = objectid()
 var articleId = objectid()
 var linkId = objectid()
-var wedigetId = objectid()
+var widgetId = objectid()
 var areaId = objectid()
 var configId = objectid()
 var menuId = objectid()
+var pageId = objectid()
 var sort = 1
 function createDocument(option) {
     var o = {
@@ -73,6 +74,13 @@ module.exports = {
         }),
         createDocument({
             parentId: systemId,
+            _id: pageId,
+            name: '页面管理',
+            alias: 'page',
+            link: '/admin/system/page'
+        }),
+        createDocument({
+            parentId: systemId,
             _id: collectionId,
             name: 'Collection管理',
             alias: 'dynamiccollection',
@@ -94,7 +102,7 @@ module.exports = {
         }),*/
         createDocument({
             parentId: systemId,
-            _id: wedigetId,
+            _id: widgetId,
             name: 'Widget管理',
             alias: 'widget',
             link: '/admin/system/widget'

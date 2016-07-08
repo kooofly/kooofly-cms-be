@@ -16,7 +16,7 @@ module.exports = {
     MODEL_MapCatagoryContent_ID: objectid(),
     MODEL_MapContentTag_ID: objectid(),
     MODEL_MapContentArea_ID: objectid(),
-    MODEL_Wediget_ID: objectid(),
+    MODEL_Widget_ID: objectid(),
     MODEL_UserConfig_ID: objectid(),
     MODEL_SystemConfig_ID: objectid(),
     MODEL_Log_ID: objectid(),

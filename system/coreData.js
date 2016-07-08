@@ -648,57 +648,83 @@ var data = [
     }),
     // 映射表 end
     createDocument({
+        name: '页面表',
+        collectionName: 'page',
+        fields: [
+            {
+                name: 'title',
+                attribute: { type: 'String', required: true },
+                control: {
+                    name: 'text',
+                    label: '标题'
+                }
+            },
+            {
+                name: 'layout',
+                attribute: { type: 'String', required: true },
+                control: {
+                    name: 'select-layout',
+                    label: '布局'
+                }
+            },
+            {
+                name: 'router',
+                attribute: { type: 'String', required: true },
+                control: {
+                    name: 'text',
+                    label: '路由'
+                }
+            },
+            {
+                name: 'config',// 考虑 vue 生命周期 vue method
+                /*example: [
+                    {
+                        widget: 'xxx',
+                        uri: '', // api资源
+                        data: [] // 静态资源
+                    }
+                ],*/
+                attribute: { type: 'Object' },
+                control: {
+                    name: 'textarea',
+                    label: '配置',
+                    placeholder: 'JSON数据'
+                }
+            },
+            {
+                name: 'description',
+                attribute: { type: 'String' },
+                control: {
+                    name: 'textarea',
+                    label: '描述',
+                    placeholder: '举例使用方式\n说明Widget需要的参数\n说明Widget的使用场景，范围\n第一次使用的考虑等'
+                }
+            },
+            isEnable,
+            sort,
+            lastModifyTime
+        ]
+    }),
+    createDocument({
         name: '区域表',
+        // TODO 删除区域表 添加 数据组表
         // 这个是针对内容的，用户使用 以后有ui界面，强调易用性
         // systemconfig里面的配置是针对会coding的超级管理员使用，强调配置灵活性
         collectionName: 'area',
         fields: [
             {
+                name: 'name',
+                attribute: { type: 'String', required: true }
+            },
+            {
                 name: 'code',
-                attribute: { type: 'String' },
-                showFilter: 'areaCode'
-            },
-            {
-                name: 'description',
-                attribute: { type: 'String', required: true },
-                control: {
-                    name: 'text',
-                    label: '描述',
-                    placeholder: '举例使用方式\n说明Widget需要的参数\n说明Widget的使用场景，范围\n第一次使用的考虑等'
-                }
-            },
-            {
-                name: 'widget', // 指定一个列表widget
-                attribute: { type: 'String', required: true },
-                control: {
-                    name: 'select', // TODO 用一个布局图形表示
-                    data: '@widget?type=content',
-                    label: '布局方式'
-                    // 统一不同模型的字段名称，可以让这个功能实现变得简单
-                }
-            },
-            {
-                name: 'paging',
-                attribute: { type: 'String' },
-                control: {
-                    name: 'select', // TODO 用一个布局图形表示
-                    data: '@widget?type=paging',
-                    label: '分页' // 选择分页控件
-                }
-            },
-            {
-                name: 'size',
-                attribute: { type: 'Number' },
-                control: {
-                    name: 'number',
-                    label: '每页显示数'
-                }
+                attribute: { type: 'String', required: true }
             },
             lastModifyTime
         ]
     }),
     createDocument({
-        _id: ids.MODEL_Wediget_ID,
+        _id: ids.MODEL_Widget_ID,
         name: 'Widget表', //删除了区域表，区域作为Widget之一，一个页面可能由多个区域组成，所以区域需要id Widget需要id
         collectionName: 'widget',
         fields: [

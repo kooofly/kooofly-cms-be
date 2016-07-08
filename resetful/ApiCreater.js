@@ -584,7 +584,7 @@ var API = Class.extend({
         this._mixServerConfig('GET', req)
         var self = this
         var query = req.query
-        var map = query._map // 是否使用联表查询
+        var waitingMap = query._map // 是否使用联表查询
         var pattern = query._pattern // 查询模式 一对一 || 一对多
         var single = query._single // 是否返回单条数据
         // 服务器端配置覆盖客户端配置
@@ -597,14 +597,22 @@ var API = Class.extend({
             }
             this.params.processor['single'] = single
         }
-        if (map) {
+        if (waitingMap) {
             if (!pattern || pattern === 'onetoone') {
-                return this._readOnetoOne(query, map).then(function (result) {
+                return this._readOnetoOne(query, waitingMap).then(function (result) {
                     return self._processor(result)
                 })
             } else if (pattern === 'onetomany') {
-                return this._readOnetoMany(query, map).then(function (result) {
-                    return self._processor(result)
+                return common.promiseParsingMap(waitingMap, this._promiseModels).then(function (map) {
+                    if (!query[map.masterId]) {
+                        return self._readSimple(query).then(function (result) {
+                            return self._processor(result)
+                        })
+                    } else {
+                        return self._readOnetoMany(query, waitingMap).then(function (result) {
+                            return self._processor(result)
+                        })
+                    }
                 })
             }
         } else {

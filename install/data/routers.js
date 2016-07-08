@@ -24,6 +24,9 @@ module.exports = {
             uri: 'api'
         }),
         createDocument({
+            uri: 'page'
+        }),
+        createDocument({
             uri: 'user'
         }),
         createDocument({
