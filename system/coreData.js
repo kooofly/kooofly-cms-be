@@ -686,7 +686,7 @@ var data = [
                 ],*/
                 attribute: { type: 'Object' },
                 control: {
-                    name: 'textarea',
+                    name: 'module-editor',
                     label: '配置',
                     placeholder: 'JSON数据'
                 }
