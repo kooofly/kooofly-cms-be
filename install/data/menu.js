@@ -53,6 +53,12 @@ module.exports = {
         }),
         createDocument({
             parentId: contentId,
+            _id: objectid(),
+            name: 'Widget Data管理',
+            alias: 'widgetdata'
+        }),
+        createDocument({
+            parentId: contentId,
             _id: tagId,
             name: '标签管理',
             alias: 'tag'
@@ -93,26 +99,12 @@ module.exports = {
             alias: 'api',
             link: '/admin/system/api'
         }),
-        /* TODO 可能不需要 等需要的时候再 开启
-        createDocument({
-            parentId: systemId,
-            _id: routeId,
-            name: 'route管理',
-            alias: 'route'
-        }),*/
         createDocument({
             parentId: systemId,
             _id: widgetId,
             name: 'Widget管理',
             alias: 'widget',
             link: '/admin/system/widget'
-        }),
-        createDocument({
-            parentId: systemId,
-            _id: areaId,
-            name: 'Area管理',
-            alias: 'area',
-            link: '/admin/system/area'
         }),
         createDocument({
             parentId: systemId,

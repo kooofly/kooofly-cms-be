@@ -181,7 +181,7 @@ var API = Class.extend({
             var options = (common.isEmptyObject(params.options) || !params.options) ? { sort: {
                 sort: 1
             } } : params.options
-            var projection = params.projection ? '-lastModifyTime ' + params.projection : '-lastModifyTime'
+            var projection = params.projection ? params.projection : '-lastModifyTime'
             return model.find(params.conditions, projection, options)
         })
     },

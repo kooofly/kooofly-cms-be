@@ -1,3 +1,7 @@
+1.添加coreData
+2.添加data/routers
+3.添加data/menu
+
 特殊查询字段：
 params:
 _single=1 表示返回单个数据

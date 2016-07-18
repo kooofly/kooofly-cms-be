@@ -418,6 +418,78 @@ var data = [
         ]
     }),
     createDocument({
+        _id: ids.MODEL_WidgetData_ID,
+        name: 'widget数据',
+        collectionName: 'widgetdata',
+        fields: [
+            {
+                name: 'pageId',
+                attribute: { type: 'ObjectId' },
+                control: {
+                    label: '页面',
+                    name: 'select',
+                    data: '@page'
+                }
+            },
+            {
+                name: 'widgetId',
+                attribute: { type: 'ObjectId', required: true },
+                control: {
+                    label: 'Widget',
+                    name: 'select',
+                    data: '@widget'
+                }
+            },
+            {
+                name: 'title',
+                attribute: { type: 'String', required: true },
+                control: {
+                    name: 'text',
+                    label: '标题'
+                }
+            },
+            {
+                name: 'link',
+                attribute: { type: 'String', required: true },
+                control: {
+                    name: 'text',
+                    label: '链接'
+                }
+            },
+            openMode,
+            {
+                name: 'description',
+                attribute: { type: 'String' },
+                control: {
+                    name: 'text',
+                    label: '描述'
+                }
+            },
+            {
+                name: 'logo',
+                attribute: { type: 'String' },
+                control: {
+                    name: 'upload',
+                    label: '图片'
+                }
+            },
+            isEnable,
+            /*{ // 忘记是干嘛用的了 可能是权限相关的
+             name: 'status',
+             attribute: { type: 'String', required: true },
+             control: {
+             name: 'radio',
+             dataSource: {
+             type: 'api',
+             value: 'role_article_status'
+             }
+             }
+             },*/
+            sort,
+            lastModifyTime
+        ]
+    }),
+    createDocument({
         _id: ids.MODEL_Article_ID,
         name: '文章表',
         collectionName: 'article',
@@ -626,26 +698,6 @@ var data = [
             sort
         ]
     }),
-    createDocument({
-        _id: ids.MODEL_MapContentArea_ID,
-        name: '区域内容映射表',
-        collectionName: 'mapareacontent',
-        fields: [
-            {
-                name: 'areaId',
-                attribute: { type: 'ObjectId', required: true }
-            },
-            {
-                name: 'contentId',
-                attribute: { type: 'ObjectId', required: true }
-            },
-            {
-                name: 'contentType',
-                attribute: { type: 'String', required: true }
-            },
-            sort
-        ]
-    }),
     // 映射表 end
     createDocument({
         name: '页面表',
@@ -686,8 +738,8 @@ var data = [
                 ],*/
                 attribute: { type: 'Object' },
                 control: {
-                    name: 'module-editor',
-                    label: '配置',
+                    name: 'page-editor',
+                    label: '页面配置',
                     placeholder: 'JSON数据'
                 }
             },
@@ -706,24 +758,6 @@ var data = [
         ]
     }),
     createDocument({
-        name: '区域表',
-        // TODO 删除区域表 添加 数据组表
-        // 这个是针对内容的，用户使用 以后有ui界面，强调易用性
-        // systemconfig里面的配置是针对会coding的超级管理员使用，强调配置灵活性
-        collectionName: 'area',
-        fields: [
-            {
-                name: 'name',
-                attribute: { type: 'String', required: true }
-            },
-            {
-                name: 'code',
-                attribute: { type: 'String', required: true }
-            },
-            lastModifyTime
-        ]
-    }),
-    createDocument({
         _id: ids.MODEL_Widget_ID,
         name: 'Widget表', //删除了区域表，区域作为Widget之一，一个页面可能由多个区域组成，所以区域需要id Widget需要id
         collectionName: 'widget',
@@ -735,20 +769,6 @@ var data = [
                     name: 'text',
                     label: '名称',
                     placeholder: 'Widget名称，用来匹配Widget'
-                }
-            },
-            {
-                name: 'type',
-                attribute: { type: 'String', required: true },
-                control: {
-                    name: 'select',
-                    default: 'system',
-                    data: [
-                        { value: 'system', text: '系统Widget' },
-                        { value: 'content', text: '内容Widget（区域配置使用）' },
-                        { value: 'paging', text: '分页（区域配置使用）' }
-                    ],
-                    label: 'Widget类型'
                 }
             },
             {

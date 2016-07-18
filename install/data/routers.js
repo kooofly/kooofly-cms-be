@@ -36,6 +36,9 @@ module.exports = {
             uri: 'catagory'
         }),
         createDocument({
+            uri: 'widgetdata'
+        }),
+        createDocument({
             uri: 'link',
             config: {
                 "post": {
@@ -50,9 +53,6 @@ module.exports = {
         }),
         createDocument({
             uri: 'tag'
-        }),
-        createDocument({
-            uri: 'area'
         }),
         createDocument({
             uri: 'widget'
