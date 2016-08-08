@@ -17,7 +17,6 @@ _version=1 是否版本控制 当更新数据时  数据的版本不一致 则 �
 映射表的添加，字段命名有限制，详见common.js 中的 promiseParsingMap()
 
 
-
 多数据 组合
 {
     result: '',

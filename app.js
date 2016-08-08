@@ -1,5 +1,6 @@
-
 var express = require('express');
+var multer = require('multer');
+var objectid = require('objectid')
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -8,12 +9,11 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var ueditor = require("ueditor")
 //var ueditor = require("ueditor-nodejs")
-var  common = require('./system/common')
+var common = require('./system/common')
 var installRouters = require('./install/routers')
 // TODO 可能的性能优化 已优化 api更新问题
 require('events').EventEmitter.prototype._maxListeners = 4
 var app = express();
-
 var install = require('./install/index')
 
 // view engine setup
@@ -29,23 +29,46 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //app.use(session({ secret: 'keyboard cat', cookie: { maxAge: 60000 }}))
 app.use(express.static(path.join(__dirname, 'assets')))
 app.use(express.static(path.join(__dirname, 'public')))
-
 app.use(function(req, res, next) {
     res.set('Access-Control-Allow-Origin', "*")
     res.set('Access-Control-Allow-Methods', "GET,POST,PUT,DELETE,OPTIONS")
-    res.set('Access-Control-Allow-Headers', "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With, X_Requested_With")
+    res.set('Access-Control-Allow-Headers', "Cache-Control, Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With, X_Requested_With")
     next()
 })
 app.use(function(req, res, next) {
     if (req.method === 'OPTIONS') {
-        res.json({
-            status: 200
-        })
+        res.send(200)
     } else {
         next()
     }
 });
+var storage = multer.diskStorage({
+    //设置上传后文件路径，uploads文件夹会自动创建。
+    destination: function (req, file, cb) {
+        cb(null, './public/upload/')
+    },
+    //给上传文件重命名，获取添加后缀名
+    filename: function (req, file, cb) {
+        var fileFormat = (file.originalname).split(".");
+        cb(null, objectid() + "." + fileFormat[fileFormat.length - 1]);
+    }
+});
+var upload = multer({ storage: storage })
+app.use('/upload', upload.single('file'), function (req, res) {
+    res.json({
+        id: req.file.path.split('.')[0],
+        path: req.file.path,
+        mimetype: req.file.mimetype,
+        originalname: req.file.originalname,
+        size: req.file.size
+    })
+});
+
 app.use(installRouters)
+
+
+
+
 // /ueditor 入口地址配置 https://github.com/netpi/ueditor/blob/master/example/public/ueditor/ueditor.config.js
 // 官方例子是这样的 serverUrl: URL + "php/controller.php"
 // 我们要把它改成 serverUrl: URL + 'ue'

@@ -634,7 +634,7 @@ var API = Class.extend({
         }
         if (isRemoveAll && !global.isDropAll) {
             global.isDropAll = true
-            var collections = ['api', 'catagory', 'dynamiccollection', 'mapcatagorycontent', 'mapcatagorydynamiccollection', 'menu', 'roles', 'systemconfig', 'link']
+            var collections = ['api', 'catagory', 'dynamiccollection', 'mapcatagorycontent', 'mapcatagorydynamiccollection', 'menu', 'roles', 'systemconfig', 'link', 'page']
             var promiseRemove = []
             collections.forEach(function (v) {
                 promiseRemove.push(db.connections[0].db.dropCollection(v))
