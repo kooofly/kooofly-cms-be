@@ -82,43 +82,47 @@ module.exports = {
             parentId: systemId,
             _id: pageId,
             name: '页面管理',
-            alias: 'page',
-            link: '/admin/system/page'
+            //link: '/admin/system/page',
+            alias: 'page'
+
         }),
         createDocument({
             parentId: systemId,
             _id: collectionId,
             name: 'Collection管理',
-            alias: 'dynamiccollection',
-            link: '/admin/system/dynamiccollection'
+            //link: '/admin/system/dynamiccollection',
+            alias: 'dynamiccollection'
+
         }),
         createDocument({
             parentId: systemId,
             _id: apiId,
             name: 'API管理',
-            alias: 'api',
-            link: '/admin/system/api'
+            //link: '/admin/system/api',
+            alias: 'api'
+
         }),
         createDocument({
             parentId: systemId,
             _id: widgetId,
             name: 'Widget管理',
-            alias: 'widget',
-            link: '/admin/system/widget'
+            //link: '/admin/system/widget',
+            alias: 'widget'
+
         }),
         createDocument({
             parentId: systemId,
             _id: configId,
             name: '系统配置',
-            alias: 'systemconfig',
-            link: '/admin/system/systemconfig'
+            //link: '/admin/system/systemconfig',
+            alias: 'systemconfig'
         }),
         createDocument({
             parentId: systemId,
             _id: menuId,
             name: '菜单管理',
-            alias: 'menu',
-            link: '/admin/system/menu'
+            //link: '/admin/system/menu',
+            alias: 'menu'
         })
     ]
 }
